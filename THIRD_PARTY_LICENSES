@@ -1,0 +1,36 @@
+This project includes the following third-party software:
+
+================================================================================
+FFmpeg
+================================================================================
+
+Copyright (c) the FFmpeg contributors.
+
+FFmpeg is licensed under the GNU General Public License version 2 or later
+(GPL-2.0-or-later), which is compatible with this project's GPL v3 license.
+
+Full license text: https://www.gnu.org/licenses/gpl-3.0.html
+Project website: https://ffmpeg.org
+Source code: https://git.ffmpeg.org/ffmpeg.git
+
+The following FFmpeg shared libraries are bundled with this distribution:
+  - libavcodec
+  - libavformat
+  - libavutil
+  - libswscale
+  - libswresample
+
+================================================================================
+Godot Engine
+================================================================================
+
+Copyright (c) 2014-present Godot Engine contributors.
+Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.
+
+Godot Engine is licensed under the MIT License.
+
+Full license text: https://github.com/godotengine/godot/blob/master/LICENSE.txt
+Project website: https://godotengine.org
+
+The godot-cpp bindings used by the GDVideo extension are also MIT-licensed.
+Source code: https://github.com/godotengine/godot-cpp

@@ -1,0 +1,303 @@
+extends VBoxContainer
+
+func _ready():
+	var text_input_nodes = [
+		$PathArea,
+		$PathThickness,
+		$RenderResolution/Values/X,
+		$RenderResolution/Values/Y,
+		%MarkersMenu/HBox/Frame/Input,
+		%MarkersMenu/HBox/Depth/Input]
+	for node in text_input_nodes:
+		node.get_child(0, true).focus_mode = FOCUS_CLICK
+	
+	var options_text_input_nodes = [
+		$PathArea,
+		$PathThickness,
+		$RenderResolution/Values/X,
+		$RenderResolution/Values/Y]
+	for node in options_text_input_nodes:
+		node.get_child(0, true).connect(
+			"focus_entered",
+			_on_input_focus_entered.bind(node))
+		node.get_child(0, true).connect(
+			"focus_exited",
+			_on_input_focus_exited.bind(node))
+	
+	var config:ConfigFile = Data.config
+	config.load(Data.config_path)
+	
+	if config.has_section_key('path', 'path_thickness'):
+		var value = config.get_value('path', 'path_thickness')
+		_on_path_thickness_value_changed(value)
+		$PathThickness.value = value
+	else:
+		_on_path_thickness_value_changed($PathThickness.value)
+	
+	if config.has_section_key('path', 'path_fade'):
+		var value = config.get_value('path', 'path_fade')
+		_on_path_fade_value_changed(value)
+		$PathFade/HSlider.value = value
+	else:
+		_on_path_fade_value_changed($PathFade/HSlider.value)
+		$PathFade/HSlider.value = $PathFade/HSlider.value
+	
+	if config.has_section_key('path', 'path_speed'):
+		var value = config.get_value('path', 'path_speed')
+		_on_path_speed_changed(value)
+		$PathSpeed/HSlider.value = value
+	else:
+		_on_path_speed_changed($PathSpeed/HSlider.value)
+		$PathSpeed/HSlider.value = $PathSpeed/HSlider.value
+	
+	if config.has_section_key('path', 'path_area'):
+		var value = config.get_value('path', 'path_area')
+		_on_path_area_value_changed(value)
+		$PathArea.value = value
+	else:
+		_on_path_area_value_changed($PathArea.value)
+
+	call_deferred("_load_waveform_config")
+
+
+func _on_path_speed_changed(value):
+	owner.path_speed = value
+	if %Controls.get_node('Paths').is_anything_selected():
+		%Controls.unload_all(true)
+		%Controls.last_path_index = -1
+	$PathSpeed/Label.text = "Path Speed: " + str(value)
+	Data.set_config('path', 'path_speed', value)
+
+
+func _on_path_fade_value_changed(value):
+	$PathFade/Label.text = "Path Edge Fade: " + str(value)
+	owner.get_node('Path').gradient.colors[0].a = 1 - value
+	owner.get_node('Path').gradient.colors[2].a = 1 - value
+	Data.set_config('path', 'path_fade', value)
+
+
+func _on_change_colors_pressed():
+	var colors: Node = get_node('../Colors')
+	colors.get_node('TabBar').current_tab = 0
+	colors._on_tab_bar_tab_changed(0)
+	colors.show()
+	hide()
+
+
+func _on_path_area_value_changed(value):
+	owner.path_area = value
+	owner.update_display()
+	Data.set_config('path', 'path_area', value)
+	$DebounceTimer.start()
+
+
+func _on_path_thickness_value_changed(value):
+	owner.get_node('Path').width = value
+	%Markers.get_node('Line').width = value
+	Data.set_config('path', 'path_thickness', value)
+	$DebounceTimer.start()
+
+
+func _on_debounce_timer_timeout():
+	%Markers.connect_all_markers()
+
+func _on_open_resources_folder_pressed() -> void:
+	OS.shell_open(Data.base_dir)
+
+
+var _waveform_opts_connected := false
+
+
+func _load_waveform_config() -> void:
+	var wv_nodes := get_tree().get_nodes_in_group("WaveformView")
+	var wv_scroll: Node = null
+	var wv_static: Node = null
+	for n in wv_nodes:
+		if   n.display_mode == 1: wv_scroll = n
+		elif n.display_mode == 0: wv_static = n
+
+	var config := Data.config
+
+	if wv_scroll:
+		if config.has_section_key('waveform', 'scroll_active'):
+			wv_scroll.visible = config.get_value('waveform', 'scroll_active')
+		if config.has_section_key('waveform', 'scroll_show_peak'):
+			wv_scroll.show_peak = config.get_value('waveform', 'scroll_show_peak')
+		if config.has_section_key('waveform', 'scroll_show_rms'):
+			wv_scroll.show_rms = config.get_value('waveform', 'scroll_show_rms')
+		if config.has_section_key('waveform', 'scroll_peak_color'):
+			wv_scroll._peak_col = config.get_value('waveform', 'scroll_peak_color')
+		if config.has_section_key('waveform', 'scroll_rms_color'):
+			wv_scroll._rms_col = config.get_value('waveform', 'scroll_rms_color')
+
+	if wv_static:
+		if config.has_section_key('waveform', 'static_active'):
+			var on: bool = config.get_value('waveform', 'static_active')
+			wv_static.visible = on and not owner.is_video_track
+			owner.get_node("%TrackSliderLarge").visible = not on or owner.is_video_track
+		if config.has_section_key('waveform', 'static_show_peak'):
+			wv_static.show_peak = config.get_value('waveform', 'static_show_peak')
+		if config.has_section_key('waveform', 'static_show_rms'):
+			wv_static.show_rms = config.get_value('waveform', 'static_show_rms')
+		if config.has_section_key('waveform', 'static_peak_color'):
+			wv_static._peak_col = config.get_value('waveform', 'static_peak_color')
+		if config.has_section_key('waveform', 'static_rms_color'):
+			wv_static._rms_col = config.get_value('waveform', 'static_rms_color')
+
+var input_zone_active: bool
+var input_zone_begin:  Vector2
+var input_zone_end:    Vector2
+
+func _on_input_focus_entered(node: Control):
+	owner.input_disabled = true
+	input_zone_active = true
+	var global_pos = node.global_position
+	input_zone_begin = global_pos
+	input_zone_end = global_pos + node.size
+
+
+func _on_input_focus_exited(node: Control):
+	owner.input_disabled = false
+	input_zone_active = false
+
+func _input(event):
+	if not input_zone_active:
+		return
+	var release_focus: bool
+	if event is InputEventMouseButton and event.is_pressed():
+		var pos = event.global_position
+		if pos.x < input_zone_begin.x or pos.x > input_zone_end.x:
+			release_focus = true
+		if pos.y < input_zone_begin.y or pos.y > input_zone_end.y:
+			release_focus = true
+	elif event.is_action_pressed('ui_accept'):
+		get_viewport().set_input_as_handled()
+		release_focus = true
+	if release_focus:
+		get_viewport().gui_get_focus_owner().release_focus()
+
+
+func _on_waveform_options_pressed() -> void:
+	var dialog   := $WaveformOptions/WaveformOptionsDialog
+	var wv_nodes := get_tree().get_nodes_in_group("WaveformView")
+	var wv_scroll: Node = null
+	var wv_static: Node = null
+	for n in wv_nodes:
+		if   n.display_mode == 1: wv_scroll = n  # SCROLLING
+		elif n.display_mode == 0: wv_static = n  # STATIC
+
+	var d_scroll := dialog.get_node("VBox/Scrolling")
+	var d_static := dialog.get_node("VBox/Static")
+
+	# Sync UI to current state on every open
+	if wv_scroll:
+		d_scroll.get_node("ScrollingActive").button_pressed    = wv_scroll.visible
+		d_scroll.get_node("Peak/ShowPeak").button_pressed      = wv_scroll.show_peak
+		d_scroll.get_node("Peak/PeakColorPicker").color        = wv_scroll._peak_col
+		d_scroll.get_node("RMS/ShowRMS").button_pressed        = wv_scroll.show_rms
+		d_scroll.get_node("RMS/RMSColorPicker").color          = wv_scroll._rms_col
+	if wv_static:
+		d_static.get_node("StaticActive").button_pressed       = wv_static.visible
+		d_static.get_node("Peak/ShowPeak").button_pressed      = wv_static.show_peak
+		d_static.get_node("Peak/PeakColorPicker").color        = wv_static._peak_col
+		d_static.get_node("RMS/ShowRMS").button_pressed        = wv_static.show_rms
+		d_static.get_node("RMS/RMSColorPicker").color          = wv_static._rms_col
+
+	# Wire up signals once
+	if not _waveform_opts_connected:
+		_waveform_opts_connected = true
+
+		if wv_scroll:
+			d_scroll.get_node("ScrollingActive").toggled.connect(func(on: bool):
+				wv_scroll.visible = on
+				Data.set_config('waveform', 'scroll_active', on))
+			d_scroll.get_node("Peak/ShowPeak").toggled.connect(func(on: bool):
+				wv_scroll.show_peak = on
+				Data.set_config('waveform', 'scroll_show_peak', on))
+			d_scroll.get_node("Peak/PeakColorPicker").color_changed.connect(func(c: Color):
+				wv_scroll._peak_col = c
+				Data.set_config('waveform', 'scroll_peak_color', c))
+			d_scroll.get_node("RMS/ShowRMS").toggled.connect(func(on: bool):
+				wv_scroll.show_rms = on
+				Data.set_config('waveform', 'scroll_show_rms', on))
+			d_scroll.get_node("RMS/RMSColorPicker").color_changed.connect(func(c: Color):
+				wv_scroll._rms_col = c
+				Data.set_config('waveform', 'scroll_rms_color', c))
+
+		if wv_static:
+			d_static.get_node("StaticActive").toggled.connect(func(on: bool):
+				wv_static.visible = on and not owner.is_video_track
+				%TrackSliderLarge.visible = not on or owner.is_video_track
+				Data.set_config('waveform', 'static_active', on))
+			d_static.get_node("Peak/ShowPeak").toggled.connect(func(on: bool):
+				wv_static.show_peak = on
+				Data.set_config('waveform', 'static_show_peak', on))
+			d_static.get_node("Peak/PeakColorPicker").color_changed.connect(func(c: Color):
+				wv_static._peak_col = c
+				Data.set_config('waveform', 'static_peak_color', c))
+			d_static.get_node("RMS/ShowRMS").toggled.connect(func(on: bool):
+				wv_static.show_rms = on
+				Data.set_config('waveform', 'static_show_rms', on))
+			d_static.get_node("RMS/RMSColorPicker").color_changed.connect(func(c: Color):
+				wv_static._rms_col = c
+				Data.set_config('waveform', 'static_rms_color', c))
+
+	dialog.popup_centered()
+
+
+func _on_gamepad_remapping_pressed() -> void:
+	$GamepadRemapping/GamepadRemapDialog.popup_centered()
+
+
+func _on_generate_funscript_pressed() -> void:
+	if not $GenerateFunscript/FileDialog.files_selected.is_connected(_on_funscript_files_selected):
+		$GenerateFunscript/FileDialog.files_selected.connect(_on_funscript_files_selected)
+	$GenerateFunscript/FileDialog.current_dir = Data.paths_dir
+	$GenerateFunscript/FileDialog.popup_centered()
+
+
+func _on_funscript_files_selected(paths: PackedStringArray) -> void:
+	var invert: bool = $GenerateFunscript/FileDialog.get_selected_options()["Inverted:"] == 1
+	var count := 0
+	var exported_paths := []
+	for bx_path in paths:
+		var file := FileAccess.open(bx_path, FileAccess.READ)
+		if not file:
+			continue
+		var parsed = JSON.parse_string(file.get_as_text())
+		file.close()
+		if not parsed is Dictionary:
+			continue
+
+		var marker_data := {}
+		var path_meta := {}
+
+		if parsed.has("markers"):
+			path_meta = parsed.get("meta", {})
+			for key in parsed["markers"]:
+				marker_data[int(key)] = parsed["markers"][key]
+		else:
+			for key in parsed:
+				marker_data[int(key)] = parsed[key]
+
+		if marker_data.is_empty():
+			continue
+
+		var base_name := bx_path.get_basename()
+		var out_path := base_name + ".funscript"
+		Funscript.export(marker_data, path_meta, out_path, invert)
+		exported_paths.append(out_path)
+		count += 1
+
+	if count > 0:
+		var text := "Exported %d funscript%s.\n" % [count, "" if count == 1 else "s"]
+		for i in mini(count, 5):
+			text += "\n" + exported_paths[i]
+		if count > 5:
+			text += "\n... and %d more" % (count - 5)
+		var dialog := AcceptDialog.new()
+		dialog.title = "Export Complete"
+		dialog.dialog_text = text
+		add_child(dialog)
+		dialog.confirmed.connect(dialog.queue_free)
+		dialog.popup_centered()

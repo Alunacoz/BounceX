@@ -1,0 +1,467 @@
+extends VBoxContainer
+
+var last_path_index: int = -1
+var _pending_file_dialog: FileDialog = null
+var _video_scrub_timer: Timer
+var _video_scrub_pending: float = -1.0
+
+
+func _ready() -> void:
+	_video_scrub_timer = Timer.new()
+	_video_scrub_timer.wait_time = 0.06
+	_video_scrub_timer.one_shot = true
+	_video_scrub_timer.timeout.connect(_on_video_scrub_timeout)
+	add_child(_video_scrub_timer)
+	load_tracks()
+	$Tracks/TrackSelection.get_popup().window_input.connect(_on_track_popup_input)
+
+
+func _on_track_popup_input(event: InputEvent) -> void:
+	if not event is InputEventMouseButton:
+		return
+	if event.button_index != MOUSE_BUTTON_RIGHT or not event.pressed:
+		return
+	var popup = $Tracks/TrackSelection.get_popup()
+	var idx = popup.get_focused_item()
+	if idx < 0:
+		return
+	var track_name = popup.get_item_text(idx)
+	popup.hide()
+	var dialog := ConfirmationDialog.new()
+	dialog.title = "Delete Track"
+	dialog.dialog_text = "Delete \"%s\"?\n\nThe audio file will be removed from your Tracks folder.\n\nPath files and renders for this track will be kept." % track_name
+	add_child(dialog)
+	dialog.confirmed.connect(func():
+		var was_selected = $Tracks/TrackSelection.selected >= 0 \
+			and $Tracks/TrackSelection.get_item_text($Tracks/TrackSelection.selected) == track_name
+		DirAccess.remove_absolute(Data.tracks_dir.path_join(track_name))
+		load_tracks()
+		if was_selected:
+			$AudioStreamPlayer.stream = null
+			%VideoStreamPlayer.stream = null
+			%VideoStreamPlayer.hide()
+			owner.is_video_track = false
+			$TrackControls/Play.button_pressed = false
+			$TrackControls/Play.disabled = true
+			$TrackControls/Play/Icon.self_modulate.a = 0.5
+			$Record.disabled = true
+			for slider in [$TrackSlider, %TrackSliderLarge]:
+				slider.editable = false
+			unload_all()
+		dialog.queue_free()
+	)
+	dialog.canceled.connect(dialog.queue_free)
+	dialog.popup_centered(Vector2(600,200))
+
+
+func _physics_process(_delta: float) -> void:
+	var is_playing: bool
+	var playback_pos: float
+	var track_length: float
+	if owner.is_video_track:
+		is_playing = %VideoStreamPlayer.is_playing()
+		playback_pos = %VideoStreamPlayer.stream_position
+		track_length = %VideoStreamPlayer.get_stream_length()
+	else:
+		is_playing = $AudioStreamPlayer.is_playing()
+		var wv := get_tree().get_first_node_in_group("WaveformView")
+		if wv:
+			track_length = wv.get_track_duration()
+		elif $AudioStreamPlayer.stream:
+			track_length = $AudioStreamPlayer.stream.get_length()
+		else:
+			return
+		var seek_offset: float = wv.get_seek_offset() if wv else 0.0
+		playback_pos = $AudioStreamPlayer.get_playback_position() + seek_offset
+	if is_playing:
+		var seconds := str(int(playback_pos) % 60).lpad(2, "0")
+		var minutes := str(int(playback_pos) / 60).lpad(2, "0")
+		%TrackSliderLarge.get_node('TrackTime').text = minutes + ":" + seconds
+		update_marker_menu()
+		if _video_scrub_pending < 0.0:
+			for slider:HSlider in [$TrackSlider, %TrackSliderLarge]:
+				slider.set_value_no_signal(playback_pos / track_length)
+
+
+func scrub(value: float) -> void:
+	if not owner._has_track_loaded():
+		return
+	for bar in [$TrackSlider, %TrackSliderLarge]:
+		if bar.value != value:
+			bar.value = value
+	var track_duration: float
+	if owner.is_video_track:
+		track_duration = %VideoStreamPlayer.get_stream_length()
+		var pos := track_duration * value
+		_video_scrub_pending = pos
+		_video_scrub_timer.start()
+	else:
+		var wv := get_tree().get_first_node_in_group("WaveformView")
+		if wv:
+			wv.seek_audio(value)
+			track_duration = wv.get_track_duration()
+		elif $AudioStreamPlayer.stream:
+			track_duration = $AudioStreamPlayer.stream.get_length()
+			var pos := track_duration * value
+			if not $AudioStreamPlayer.playing:
+				$AudioStreamPlayer.play(pos)
+				$AudioStreamPlayer.stream_paused = true
+			elif $AudioStreamPlayer.stream_paused:
+				$AudioStreamPlayer.stream_paused = false
+				$AudioStreamPlayer.seek(pos)
+				$AudioStreamPlayer.stream_paused = true
+			else:
+				$AudioStreamPlayer.seek(pos)
+	owner.frame = round((owner.path.size() - 1) * value)
+	update_marker_menu()
+	%Markers.position_markers()
+	var stream_position := track_duration * value
+	var seconds := str(int(stream_position) % 60).lpad(2, "0")
+	var minutes := str(int(stream_position) / 60).lpad(2, "0")
+	%TrackSliderLarge.get_node('TrackTime').text = minutes + ":" + seconds
+	if sign(owner.path[owner.frame]) > -1:
+		owner.place_ball(owner.path[owner.frame])
+	elif $Paths.is_anything_selected():
+		owner.toggle_ball_visible(false)
+
+
+func _on_video_scrub_timeout() -> void:
+	if _video_scrub_pending < 0.0:
+		return
+	var pos := _video_scrub_pending
+	_video_scrub_pending = -1.0
+	if not %VideoStreamPlayer.is_playing():
+		%VideoStreamPlayer.play()
+		%VideoStreamPlayer.set_stream_position(pos)
+		%VideoStreamPlayer.paused = true
+	elif %VideoStreamPlayer.paused:
+		%VideoStreamPlayer.paused = false
+		%VideoStreamPlayer.set_stream_position(pos)
+		%VideoStreamPlayer.paused = true
+	else:
+		%VideoStreamPlayer.set_stream_position(pos)
+
+
+func update_marker_menu() -> void:
+	if not %Markers.selected_marker:
+		%MarkersMenu/HBox/Frame/Input.value = owner.frame
+
+
+func _on_volume_slider_value_changed(value: float) -> void:
+	$Volume/Label.text = "Volume: %s" % int(value) + "%"
+	var db := linear_to_db(value / 100.0) if value > 0.0 else -80.0
+	$AudioStreamPlayer.volume_db = db
+	%VideoStreamPlayer.volume_db = db
+	Data.set_config('user', 'volume', value)
+
+
+func _on_track_selection_toggled(button_pressed: bool) -> void:
+	if button_pressed:
+		load_tracks()
+
+
+func load_tracks() -> void:
+	var dir      := DirAccess.open(Data.tracks_dir)
+	var selected = $Tracks/TrackSelection.selected
+	$Tracks/TrackSelection.clear()
+	if not dir:
+		return
+	var files: PackedStringArray
+	dir.list_dir_begin()
+	var file_name := dir.get_next()
+	while file_name != "":
+		var ext := file_name.get_extension().to_lower()
+		if ext in ["mp3", "wav", "ogg"] or ext in Data.VIDEO_EXTENSIONS:
+			files.append(file_name)
+		file_name = dir.get_next()
+	dir.list_dir_end()
+	files.sort()
+	for f in files:
+		$Tracks/TrackSelection.add_item(f)
+	$Tracks/TrackSelection.selected = selected
+
+
+func _on_track_selected(index: int) -> void:
+	var track_name = $Tracks/TrackSelection.get_item_text(index)
+	var file_path := Data.tracks_dir.path_join(track_name)
+	if Data.is_video_file(file_path):
+		owner.is_video_track = true
+		$AudioStreamPlayer.stream = null
+		if not %VideoStreamPlayer.load_video(file_path):
+			owner.is_video_track = false
+			%VideoStreamPlayer.stream = null
+			_show_decode_error(track_name)
+			return
+		%VideoStreamPlayer.show()
+		_hide_waveforms()
+	else:
+		owner.is_video_track = false
+		var stream = Data.load_audio_stream(file_path)
+		if not stream:
+			_show_decode_error(track_name)
+			return
+		$AudioStreamPlayer.stream = stream
+		%VideoStreamPlayer.stream = null
+		%VideoStreamPlayer.hide()
+		_show_waveforms()
+	var wv := get_tree().get_first_node_in_group("WaveformView")
+	if wv:
+		wv.invalidate_duration()
+	for slider in [$TrackSlider, %TrackSliderLarge]:
+		slider.editable = true
+	if not Data.config.get_value('waveform', 'scroll_active', true):
+		%TrackSliderLarge.show()
+	$TrackControls/Play.button_pressed = false
+	$TrackControls/Play.disabled = false
+	$TrackControls/Play/Icon.self_modulate.a = 1
+	$Record.disabled = false
+	DirAccess.make_dir_recursive_absolute(Data.paths_dir.path_join(track_name))
+	load_paths(track_name)
+	Data.set_config('user', 'track', track_name)
+	owner.frame = 0
+	owner.define_path()
+	scrub(0)
+
+
+func load_paths(track_title: String, do_scrub := false) -> void:
+	var dir  := DirAccess.open(Data.paths_dir.path_join(track_title))
+	var list: PackedStringArray
+	$Render.disabled = true
+	$Paths.clear()
+	%Markers.selected_multi_markers.clear()
+	unload_all(do_scrub)
+	last_path_index = -1
+	if not dir:
+		return
+	dir.list_dir_begin()
+	var file_name := dir.get_next()
+	while file_name != "":
+		list.append(file_name)
+		file_name = dir.get_next()
+	dir.list_dir_end()
+	list.reverse()
+	for title in list:
+		if title.ends_with('.bx'):
+			$Paths.add_item(title.trim_suffix('.bx'))
+
+
+func _on_path_selected(index: int) -> void:
+	if %Markers.selected_marker and is_instance_valid(%Markers.selected_marker):
+		%Markers.marker_toggled(false, %Markers.selected_marker)
+	if index == last_path_index:
+		unload_all()
+		owner.marker_data[0] = [0, 0, 0, 0]
+		%Markers.add_marker(0, 0)
+		last_path_index = -1
+	else:
+		for line in get_tree().get_nodes_in_group('lines'):
+			line.queue_free()
+		last_path_index = index
+		$Render.disabled = false
+		owner.get_node('Ball').show()
+		Data.load_path(Data.get_file_path())
+		var path_value = owner.path[owner.frame]
+		if path_value > -1:
+			owner.place_ball(path_value)
+
+
+func unload_all(do_scrub := false) -> void:
+	$Paths.deselect_all()
+	$Render.disabled = true
+	owner.define_path(false)
+	owner.marker_data.clear()
+	for marker in %Markers.marker_list.values():
+		marker.queue_free()
+	for line in get_tree().get_nodes_in_group('lines'):
+		line.queue_free()
+	%Markers.marker_list.clear()
+	if do_scrub:
+		scrub(0)
+		owner.place_marker(0)
+
+
+func _on_paths_item_clicked(index: int, _at_position: Vector2, mouse_button_index: int) -> void:
+	if index == last_path_index and mouse_button_index == 2:
+		var track_title = $Tracks/TrackSelection.get_item_text($Tracks/TrackSelection.selected)
+		$Paths/EditPathFile.track_title = track_title
+		$Paths/EditPathFile.path_name = $Paths.get_item_text(index)
+		$Paths/EditPathFile/VBox/FileName/Input.text = $Paths.get_item_text(index)
+		$Paths/EditPathFile/VBox/PathCreator/Input.text = owner.path_meta.get("path_creator", "")
+		$Paths/EditPathFile/VBox/RelatedMedia/Input.text = owner.path_meta.get("related_media", "")
+		$Paths/EditPathFile.popup_centered()
+
+
+# ── Track file importer ───────────────────────────────────────────────────────
+
+func _on_load_tracks_pressed() -> void:
+	if _pending_file_dialog:
+		return
+	_pending_file_dialog = FileDialog.new()
+	_pending_file_dialog.min_size = Vector2(300, 500)
+	_pending_file_dialog.theme = load("res://theme_basic.tres")
+	_pending_file_dialog.set('theme_override_constants/thumbnail_size', 40)
+	_pending_file_dialog.file_mode = FileDialog.FILE_MODE_OPEN_FILES
+	_pending_file_dialog.access    = FileDialog.ACCESS_FILESYSTEM
+	var video_globs := ",".join(Data.VIDEO_EXTENSIONS.map(func(e): return "*." + e))
+	_pending_file_dialog.filters   = PackedStringArray([
+		"*.mp3,*.wav,*.ogg," + video_globs + " ; Audio & Video Files",
+		"*.mp3,*.wav,*.ogg ; Audio Files",
+		video_globs + " ; Video Files",
+	])
+	_pending_file_dialog.use_native_dialog = true
+	add_child(_pending_file_dialog)
+	var prev_file_path = Data.config.get_value('user', 'load_file_path', "")
+	if prev_file_path != "" and DirAccess.dir_exists_absolute(prev_file_path):
+		_pending_file_dialog.current_dir = prev_file_path
+	else:
+		_pending_file_dialog.current_dir = OS.get_system_dir(OS.SYSTEM_DIR_DESKTOP)
+	_pending_file_dialog.files_selected.connect(_on_track_files_selected)
+	_pending_file_dialog.canceled.connect(_dismiss_file_dialog)
+	_pending_file_dialog.popup_centered(Vector2i(800, 500))
+
+
+func _dismiss_file_dialog() -> void:
+	if _pending_file_dialog:
+		_pending_file_dialog.queue_free()
+		_pending_file_dialog = null
+
+
+func _on_track_files_selected(source_paths: PackedStringArray) -> void:
+	_dismiss_file_dialog()
+	var last_name := ""
+	
+	for source_path in source_paths:
+		var file_name  := source_path.get_file()
+		var dest_path  := Data.tracks_dir.path_join(file_name)
+		var final_name := file_name
+		
+		if FileAccess.file_exists(dest_path):
+			if FileAccess.get_md5(source_path) == FileAccess.get_md5(dest_path):
+				last_name = file_name
+				continue
+			var base := file_name.get_basename()
+			var ext  := "." + file_name.get_extension()
+			var n    := 2
+			while FileAccess.file_exists(Data.tracks_dir.path_join("%s (%d)%s" % [base, n, ext])):
+				n += 1
+			final_name = "%s (%d)%s" % [base, n, ext]
+			dest_path  = Data.tracks_dir.path_join(final_name)
+		
+		var src := FileAccess.open(source_path, FileAccess.READ)
+		var dst := FileAccess.open(dest_path, FileAccess.WRITE)
+		if src and dst:
+			dst.store_buffer(src.get_buffer(src.get_length()))
+		if src: src.close()
+		if dst: dst.close()
+		
+		last_name = final_name
+		if final_name != file_name:
+			_show_import_notification(file_name, final_name)
+	
+	if last_name != "":
+		load_tracks()
+		_select_track_by_name(last_name)
+		Data.set_config('user', 'load_file_path', source_paths[0].get_base_dir())
+		var has_mp3 := false
+		var has_ogg := false
+		var has_wav_conversion := false
+		for source_path in source_paths:
+			var ext := source_path.get_extension().to_lower()
+			if ext   == "mp3": has_mp3 = true
+			elif ext == "ogg": has_ogg = true
+			elif ext == "wav" and Data.wav_needs_conversion(source_path): has_wav_conversion = true
+		var comp_shown := _show_compression_notice(has_mp3, has_ogg)
+		var wav_shown  := _show_wav_conversion_notice() if has_wav_conversion else false
+		if comp_shown and wav_shown:
+			$Tracks/LoadTracks/ConversionNotice.position.x  += 220
+			$Tracks/LoadTracks/CompressionNotice.position.x -= 220
+
+
+func _select_track_by_name(name: String) -> void:
+	for i in $Tracks/TrackSelection.item_count:
+		if $Tracks/TrackSelection.get_item_text(i) == name:
+			$Tracks/TrackSelection.selected = i
+			_on_track_selected(i)
+			return
+
+
+func _show_decode_error(file_name: String) -> void:
+	var dialog := AcceptDialog.new()
+	dialog.title       = "Failed to Load Track"
+	dialog.dialog_text = "\"%s\" could not be decoded.\n\nThe file may be corrupted or in an unsupported format." % file_name
+	add_child(dialog)
+	dialog.confirmed.connect(dialog.queue_free)
+	dialog.canceled.connect(dialog.queue_free)
+	dialog.popup_centered()
+
+
+func _show_import_notification(original: String, imported_as: String) -> void:
+	var dialog := AcceptDialog.new()
+	dialog.title       = "Track Imported"
+	dialog.dialog_text = "\"%s\" already exists with different content.\nImported as: \"%s\"" % [original, imported_as]
+	add_child(dialog)
+	dialog.confirmed.connect(dialog.queue_free)
+	dialog.canceled.connect(dialog.queue_free)
+	dialog.popup_centered()
+
+
+func _show_wav_conversion_notice() -> bool:
+	if not Data.config.get_value('user', 'display_wav_notification', true):
+		return false
+	var notice: AcceptDialog = $Tracks/LoadTracks/ConversionNotice
+	var notice_label: Label  = $Tracks/LoadTracks/ConversionNotice/VBox/Label
+	var checkbox: CheckBox   = $Tracks/LoadTracks/ConversionNotice/VBox/DoNotShowCheckBox
+	checkbox.button_pressed = false
+	notice.title      = "WAV Conversion Notice"
+	notice_label.text = "WAV encodings other than 16-bit PCM require\nconversion when loading.\n\nIf you want to avoid the extra loading time,\nsave your file with 16-bit PCM encoding."
+	notice.confirmed.connect(func():
+		if checkbox.button_pressed:
+			Data.set_config('user', 'display_wav_notification', false), CONNECT_ONE_SHOT)
+	notice.popup_centered()
+	return true
+
+
+func _show_compression_notice(has_mp3: bool, has_ogg: bool) -> bool:
+	if not Data.config.get_value('user', 'display_mp3_notification', true):
+		has_mp3 = false
+	if not Data.config.get_value('user', 'display_ogg_notification', true):
+		has_ogg = false
+	if not has_mp3 and not has_ogg:
+		return false
+	var notice: AcceptDialog = $Tracks/LoadTracks/CompressionNotice
+	var notice_label: Label  = $Tracks/LoadTracks/CompressionNotice/VBox/Label
+	var checkbox: CheckBox   = $Tracks/LoadTracks/CompressionNotice/VBox/DoNotShowCheckBox
+	checkbox.button_pressed = false
+	if has_mp3 and has_ogg:
+		notice.title      = "Compressed Audio Notice"
+		notice_label.text = "Compressed audio files require more\nresources than uncompressed WAV files.\n\nMP3 files can experience slow waveform\nloading and lag when scrubbing through\nlonger tracks, and OGG files can\nexperience slow waveform loading.\n\nConsider converting your tracks to a\n16-bit PCM WAV format for instant\nloading and smooth performance."
+		notice.size.y     = 415
+	elif has_mp3:
+		notice.title      = "MP3 Performance Notice"
+		notice_label.text = "Compressed MP3 files require more\nresources than uncompressed WAV files.\n\nIf you experience slow waveform loading\nor lag when scrubbing through longer tracks,\nconsider converting to a 16-bit PCM WAV\nformat for instant loading and\nsmooth performance."
+		notice.size.y     = 330
+	else:
+		notice.title      = "OGG Performance Notice"
+		notice_label.text = "Compressed OGG files require additional\ntime to load the waveform display.\n\nFor instant waveform loading, consider\nconverting to a 16-bit PCM WAV format."
+		notice.size.y     = 250
+	notice.confirmed.connect(func():
+		if checkbox.button_pressed:
+			if has_mp3: Data.set_config('user', 'display_mp3_notification', false)
+			if has_ogg: Data.set_config('user', 'display_ogg_notification', false),
+			CONNECT_ONE_SHOT)
+	notice.popup_centered()
+	return true
+
+
+func _hide_waveforms() -> void:
+	owner.get_node("WaveformStatic").hide()
+	owner.get_node("WaveformScrolling").hide()
+	%TrackSliderLarge.show()
+
+
+func _show_waveforms() -> void:
+	if Data.config.get_value('waveform', 'static_active', true):
+		owner.get_node("WaveformStatic").show()
+		%TrackSliderLarge.hide()
+	if Data.config.get_value('waveform', 'scroll_active', true):
+		owner.get_node("WaveformScrolling").show()

@@ -1,0 +1,1978 @@
+[gd_scene format=3 uid="uid://ddntuwjds6r37"]
+
+[ext_resource type="Theme" uid="uid://4ddly4r83yek" path="res://theme.tres" id="1_2oy47"]
+[ext_resource type="Script" uid="uid://1d8amukvl8x1" path="res://bouncex.gd" id="2_3llay"]
+[ext_resource type="Curve" uid="uid://brt3xnflwm2r" path="res://curves/ball_flash_curve.tres" id="3_wnxtc"]
+[ext_resource type="Curve" uid="uid://dl3hfhb1q3xfn" path="res://curves/path_flash_curve.tres" id="4_jwkas"]
+[ext_resource type="Texture2D" uid="uid://bcdbk4tsjnisc" path="res://textures/Square.svg" id="5_ewps7"]
+[ext_resource type="Texture2D" uid="uid://404qr06t6u7x" path="res://textures/Line.svg" id="6_68j5r"]
+[ext_resource type="Script" uid="uid://bepne8rumac7s" path="res://markers.gd" id="7_5q7av"]
+[ext_resource type="Texture2D" uid="uid://bius3v0napj7c" path="res://textures/Ball.svg" id="8_5ek1g"]
+[ext_resource type="Texture2D" uid="uid://bkabq6ivbs23x" path="res://textures/Circle.svg" id="9_ymix4"]
+[ext_resource type="Texture2D" uid="uid://cbwqw7m1wqj64" path="res://textures/Dot.svg" id="10_dtnc4"]
+[ext_resource type="Texture2D" uid="uid://bgcpkp1078rc6" path="res://textures/Add Marker.svg" id="11_2agkk"]
+[ext_resource type="Texture2D" uid="uid://qn8b5b6gg863" path="res://textures/Generate Cycle.svg" id="12_ak1ar"]
+[ext_resource type="Texture2D" uid="uid://1uor7ar7yyam" path="res://textures/Copy.svg" id="13_2estk"]
+[ext_resource type="Texture2D" uid="uid://dndicopykmmg2" path="res://textures/Paste.svg" id="14_usymf"]
+[ext_resource type="Texture2D" uid="uid://c13twlshihhp5" path="res://textures/Delete.svg" id="15_rigon"]
+[ext_resource type="Script" uid="uid://cny60f56edcqg" path="res://controls.gd" id="16_7m41a"]
+[ext_resource type="Script" uid="uid://diomic0v27cwt" path="res://track_controls.gd" id="17_3llay"]
+[ext_resource type="Texture2D" uid="uid://bqgebmq2ks1mj" path="res://textures/Play.svg" id="17_y5iiq"]
+[ext_resource type="Texture2D" uid="uid://dnc4n3dtd5v83" path="res://textures/Pause.svg" id="18_fpln1"]
+[ext_resource type="Script" uid="uid://nsl3o8yvg3sa" path="res://options.gd" id="19_c71nt"]
+[ext_resource type="Script" uid="uid://47ckroob8soh" path="res://colors.gd" id="20_l7p5h"]
+[ext_resource type="Texture2D" uid="uid://cdlwfv4b2xdt7" path="res://textures/X.svg" id="21_7sroq"]
+[ext_resource type="Script" uid="uid://bti7gegvmhi6s" path="res://edit_path_file.gd" id="21_68j5r"]
+[ext_resource type="Texture2D" uid="uid://bmlus4dohtrmw" path="res://textures/Gear.svg" id="22_ualp2"]
+[ext_resource type="Texture2D" uid="uid://c7tcg80cl58pp" path="res://textures/Menu.svg" id="23_fa01g"]
+[ext_resource type="FontFile" uid="uid://c2wtnhu46b5xf" path="res://font/Rubik-Light.ttf" id="24_ymjnd"]
+[ext_resource type="Texture2D" uid="uid://dnlqy6ppe68nr" path="res://textures/Play Small.svg" id="25_ok0dy"]
+[ext_resource type="Script" uid="uid://cdjscsr1nq1sp" path="res://render_range.gd" id="26_i60md"]
+[ext_resource type="Script" uid="uid://cov18vyjv4ei6" path="res://render_complete.gd" id="27_dl3lf"]
+[ext_resource type="Script" uid="uid://viu0qeogdrek" path="res://generate_cycle.gd" id="28_camxn"]
+[ext_resource type="Texture2D" uid="uid://cvdu2l73nu3mw" path="res://textures/Key Map.svg" id="29_dh5m7"]
+[ext_resource type="Texture2D" uid="uid://4gt7poc6r8ta" path="res://textures/Right Click.png" id="30_ju7a3"]
+[ext_resource type="Script" uid="uid://b2dh4aoxsqaro" path="res://waveform_view.gd" id="31_avrwg"]
+[ext_resource type="Theme" uid="uid://cmg45ext3ht7" path="res://theme_basic.tres" id="33_jwkas"]
+[ext_resource type="Script" uid="uid://uib12yuil3uo" path="res://gamepad_remap.gd" id="33_wnxtc"]
+[ext_resource type="Script" uid="uid://mmef45gvxd6x" path="res://video_player.gd" id="video_player_script"]
+
+[sub_resource type="Gradient" id="Gradient_gixs1"]
+offsets = PackedFloat32Array(0, 0.5, 1)
+colors = PackedColorArray(1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0)
+
+[sub_resource type="GDScript" id="GDScript_31oqs"]
+script/source = "extends MenuButton
+
+func _ready():
+	get_popup().connect(\"index_pressed\", item_pressed)
+	get_popup().hide_on_item_selection = false
+	get_popup().hide_on_checkable_item_selection = false
+
+
+func item_pressed(item:int):
+	var selected_marker = %Markers.selected_marker
+	if not selected_marker:
+		return
+	get_popup().toggle_item_checked(item)
+	var markers:Array
+	markers.append(selected_marker)
+	for marker in %Markers.selected_multi_markers:
+		markers.append(marker)
+	var active_functions:int
+	for index in get_popup().item_count:
+		if get_popup().is_item_checked(index):
+			active_functions += get_popup().get_item_id(index)
+	for marker in markers:
+		var marker_frame = marker.get_meta('frame')
+		owner.marker_data[marker_frame][3] = active_functions
+		if active_functions & 1 << 0:
+			marker.self_modulate = Color.HOT_PINK
+		else:
+			marker.self_modulate = Color.WHITE
+	Data.save_path()
+"
+
+[sub_resource type="GDScript" id="GDScript_575x6"]
+script/source = "extends VBoxContainer
+
+func _on_x_value_changed(value):
+	Data.set_config('user', 'render_resolution:x', value)
+
+func _on_y_value_changed(value):
+	Data.set_config('user', 'render_resolution:y', value)
+"
+
+[sub_resource type="GDScript" id="GDScript_nob1l"]
+script/source = "extends VBoxContainer
+
+func _ready():
+	match DisplayServer.window_get_mode():
+		DisplayServer.WINDOW_MODE_WINDOWED:
+			$OptionButton.select(0)
+		DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN:
+			$OptionButton.select(1)
+
+func _on_option_button_item_selected(index):
+	var display_mode:int
+	match index:
+		0:
+			display_mode = DisplayServer.WINDOW_MODE_WINDOWED
+		1:
+			display_mode = DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN
+	DisplayServer.window_set_mode(display_mode)
+	Data.set_config('user', 'display_mode', index)
+"
+
+[sub_resource type="GDScript" id="GDScript_a4j0w"]
+script/source = "extends TextureButton
+
+func _on_pressed():
+	var info_panel = owner.get_node('InfoPanel')
+	info_panel.show()
+	$Notification.hide()
+	info_panel.self_modulate.a = 1.65
+
+func _on_mouse_entered():
+	get_parent().self_modulate = Color.DARK_ORANGE
+
+func _on_mouse_exited():
+	get_parent().self_modulate = Color.WHITE
+"
+
+[sub_resource type="GDScript" id="GDScript_q4aw8"]
+script/source = "extends TextureButton
+
+func _on_mouse_entered():
+	self_modulate = 'ff4040'
+
+
+func _on_mouse_exited():
+	self_modulate = 'ff7474d7'
+
+
+func _on_pressed():
+	modulate.a = 2.2
+	for frame in 3:
+		await get_tree().process_frame
+	get_tree().quit()
+"
+
+[sub_resource type="GDScript" id="GDScript_sh086"]
+script/source = "extends TextureButton
+
+func _on_mouse_entered():
+	if not button_pressed:
+		self_modulate.a = 1
+	else:
+		self_modulate.a = 1.8
+
+
+func _on_mouse_exited():
+	if not button_pressed:
+		self_modulate.a = 0.8
+	else:
+		self_modulate.a = 2.8
+
+
+func _on_toggled(button_pressed):
+	if button_pressed:
+		self_modulate = '4040ff'
+		self_modulate.a = 2.8
+		%Controls.hide()
+		%Options.show()
+	else:
+		owner.input_disabled = false
+		self_modulate = 'ffff40cc'
+		owner.get_node('Menu/Colors').hide()
+		%Options.hide()
+		%Controls.show()
+"
+
+[sub_resource type="GDScript" id="GDScript_8l1ut"]
+script/source = "extends TextureButton
+
+var tween:Tween
+
+@onready var menu = owner.get_node('Menu')
+@onready var options_button = get_node('../OptionsButton')
+@onready var exit_button = get_node('../ExitButton')
+
+func _ready():
+	options_button.modulate.a = 0
+	options_button.position.x = 0
+	exit_button.modulate.a = 0
+	exit_button.position.x = 0
+	ui_mouse_filter(false)
+
+
+func _on_mouse_entered():
+	if button_pressed:
+		self_modulate.a = 0.8
+	else:
+		self_modulate = '4fd6d6'
+
+
+func _on_mouse_exited():
+	if button_pressed:
+		self_modulate.a = 1
+	else:
+		self_modulate = '74ffffa1'
+
+
+func _on_toggled(button_pressed):
+	tween = get_tree().create_tween()
+	tween.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUART).set_parallel()
+	var menu_pos:float
+	var options_pos:float
+	var exit_pos:float
+	var alpha:float
+	if button_pressed:
+		for node in [get_node('../Record'), get_node('../Play')]:
+			node.modulate.a = 0
+		menu_pos = 0
+		options_pos = 127
+		exit_pos = 245
+		alpha = 1
+		self_modulate = '00a86b'
+		if get_node('../OptionsButton').toggled:
+			get_node('../OptionsButton').button_pressed = false
+		tween.tween_callback(ui_mouse_filter.bind(true)).set_delay(0.3)
+	else:
+		for node in [get_node('../Record'), get_node('../Play')]:
+			node.modulate.a = 1
+		menu_pos = -menu.size.x
+		options_pos = 0
+		exit_pos = 0
+		alpha = 0
+		self_modulate = '74ffffa1'
+		owner.input_disabled = false
+		tween.tween_callback(ui_mouse_filter.bind(false)).set_delay(0.3)
+		tween.tween_callback(menu.get_node('Colors').hide).set_delay(0.3)
+	tween.tween_property(menu, 'position:x', menu_pos, 0.25)
+	tween.tween_property(options_button, 'position:x', options_pos, 0.3)
+	tween.tween_property(options_button, 'modulate:a', alpha, 0.3)
+	tween.tween_property(exit_button, 'position:x', exit_pos, 0.3)
+	tween.tween_property(exit_button, 'modulate:a', alpha, 0.4)
+
+
+func ui_mouse_filter(active:bool) -> void:
+	if active:
+		options_button.mouse_filter = MOUSE_FILTER_STOP
+		exit_button.mouse_filter = MOUSE_FILTER_STOP
+	else:
+		options_button.mouse_filter = MOUSE_FILTER_IGNORE
+		exit_button.mouse_filter = MOUSE_FILTER_IGNORE
+"
+
+[sub_resource type="GDScript" id="GDScript_cf1v0"]
+script/source = "extends Button
+
+func _on_pressed():
+	get_parent().hide()
+"
+
+[node name="BounceX" type="Control" unique_id=309243659]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+theme = ExtResource("1_2oy47")
+script = ExtResource("2_3llay")
+flash_curve = ExtResource("3_wnxtc")
+path_flash_curve = ExtResource("4_jwkas")
+
+[node name="VideoStreamPlayer" type="VideoStreamPlayer" parent="." unique_id=1811104179]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+expand = true
+script = ExtResource("video_player_script")
+
+[node name="Backdrop" type="TextureRect" parent="." unique_id=681098656]
+self_modulate = Color(0, 0, 0, 0.313726)
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_top = -53.0
+offset_bottom = 53.0
+texture = ExtResource("5_ewps7")
+
+[node name="TopLine" type="TextureRect" parent="." unique_id=486657802]
+custom_minimum_size = Vector2(0, 4)
+layout_mode = 1
+anchors_preset = 14
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_top = -53.0
+offset_bottom = -49.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("6_68j5r")
+expand_mode = 2
+stretch_mode = 1
+
+[node name="BottomLine" type="TextureRect" parent="." unique_id=738743289]
+custom_minimum_size = Vector2(0, 4)
+layout_mode = 1
+anchors_preset = 14
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_top = 49.0
+offset_bottom = 53.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("6_68j5r")
+expand_mode = 1
+stretch_mode = 1
+
+[node name="Markers" type="Control" parent="." unique_id=1744523429]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+script = ExtResource("7_5q7av")
+
+[node name="Line" type="Line2D" parent="Markers" unique_id=290977129]
+show_behind_parent = true
+
+[node name="Marker" type="Sprite2D" parent="Markers" unique_id=1500581216]
+visible = false
+position = Vector2(576, 324)
+texture = ExtResource("8_5ek1g")
+
+[node name="Button" type="TextureButton" parent="Markers/Marker" unique_id=1167804278]
+self_modulate = Color(1, 0.498039, 0.313726, 1)
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -30.0
+offset_top = -30.0
+offset_right = -2.0
+offset_bottom = -2.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(14, 14)
+focus_mode = 0
+toggle_mode = true
+texture_normal = ExtResource("9_ymix4")
+ignore_texture_size = true
+stretch_mode = 4
+
+[node name="Selected" type="TextureRect" parent="Markers/Marker/Button" unique_id=1951710207]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -7.0
+offset_top = -7.0
+offset_right = 7.0
+offset_bottom = 7.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("10_dtnc4")
+expand_mode = 1
+
+[node name="Path" type="Line2D" parent="." unique_id=134465722]
+visible = false
+gradient = SubResource("Gradient_gixs1")
+
+[node name="Ball" type="Sprite2D" parent="." unique_id=2128764278]
+visible = false
+position = Vector2(576, 324)
+texture = ExtResource("8_5ek1g")
+
+[node name="WaveformStatic" type="Node2D" parent="." unique_id=812973158]
+z_index = -1
+position = Vector2(0, 925)
+script = ExtResource("31_avrwg")
+
+[node name="WaveformScrolling" type="Node2D" parent="." unique_id=1702736116]
+z_index = -1
+script = ExtResource("31_avrwg")
+display_mode = 1
+
+[node name="MarkersMenu" type="Panel" parent="." unique_id=1986661680]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -967.0
+offset_bottom = 52.0
+grow_horizontal = 0
+
+[node name="HBox" type="HBoxContainer" parent="MarkersMenu" unique_id=538554200]
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 13.0
+offset_top = -20.0
+offset_right = 883.0
+offset_bottom = 20.0
+grow_vertical = 2
+theme_override_constants/separation = 15
+
+[node name="Trans" type="OptionButton" parent="MarkersMenu/HBox" unique_id=1068676960]
+custom_minimum_size = Vector2(98, 0)
+layout_mode = 2
+focus_mode = 0
+selected = 1
+item_count = 11
+popup/item_0/text = "Linear"
+popup/item_0/id = 0
+popup/item_1/text = "Sine"
+popup/item_1/id = 1
+popup/item_2/text = "Quint"
+popup/item_2/id = 2
+popup/item_3/text = "Quart"
+popup/item_3/id = 3
+popup/item_4/text = "Quad"
+popup/item_4/id = 4
+popup/item_5/text = "Expo"
+popup/item_5/id = 5
+popup/item_6/text = "Elastic"
+popup/item_6/id = 6
+popup/item_7/text = "Cubic"
+popup/item_7/id = 7
+popup/item_8/text = "Circ"
+popup/item_8/id = 8
+popup/item_9/text = "Bounce"
+popup/item_9/id = 9
+popup/item_10/text = "Back"
+popup/item_10/id = 10
+
+[node name="Ease" type="OptionButton" parent="MarkersMenu/HBox" unique_id=1390031340]
+visible = false
+custom_minimum_size = Vector2(141, 0)
+layout_mode = 2
+focus_mode = 0
+selected = 2
+item_count = 4
+popup/item_0/text = "Ease In"
+popup/item_0/id = 0
+popup/item_1/text = "Ease Out"
+popup/item_1/id = 1
+popup/item_2/text = "Ease In/Out"
+popup/item_2/id = 2
+popup/item_3/text = "Ease Out/In"
+popup/item_3/id = 3
+
+[node name="EaseUp" type="OptionButton" parent="MarkersMenu/HBox" unique_id=1256594909]
+custom_minimum_size = Vector2(175, 0)
+layout_mode = 2
+focus_mode = 0
+selected = 2
+item_count = 4
+popup/item_0/text = "Ease Up In"
+popup/item_0/id = 0
+popup/item_1/text = "Ease Up Out"
+popup/item_1/id = 1
+popup/item_2/text = "Ease Up In/Out"
+popup/item_2/id = 2
+popup/item_3/text = "Ease Up Out/In"
+popup/item_3/id = 3
+
+[node name="EaseDown" type="OptionButton" parent="MarkersMenu/HBox" unique_id=378862405]
+custom_minimum_size = Vector2(204, 0)
+layout_mode = 2
+focus_mode = 0
+selected = 2
+item_count = 4
+popup/item_0/text = "Ease Down In"
+popup/item_0/id = 0
+popup/item_1/text = "Ease Down Out"
+popup/item_1/id = 1
+popup/item_2/text = "Ease Down In/Out"
+popup/item_2/id = 2
+popup/item_3/text = "Ease Down Out/In"
+popup/item_3/id = 3
+
+[node name="AuxiliaryFunctions" type="MenuButton" parent="MarkersMenu/HBox" unique_id=550839984]
+visible = false
+custom_minimum_size = Vector2(106, 0)
+layout_mode = 2
+text = "Functions"
+flat = false
+item_count = 8
+popup/item_0/text = "Hold Breath"
+popup/item_0/checkable = 1
+popup/item_0/id = 1
+popup/item_1/text = "Function 2"
+popup/item_1/checkable = 1
+popup/item_1/id = 2
+popup/item_2/text = "Function 3"
+popup/item_2/checkable = 1
+popup/item_2/id = 4
+popup/item_3/text = "Function 4"
+popup/item_3/checkable = 1
+popup/item_3/id = 8
+popup/item_4/text = "Function 5"
+popup/item_4/checkable = 1
+popup/item_4/id = 16
+popup/item_5/text = "Function 6"
+popup/item_5/checkable = 1
+popup/item_5/id = 32
+popup/item_6/text = "Function 7"
+popup/item_6/checkable = 1
+popup/item_6/id = 64
+popup/item_7/text = "Function 8"
+popup/item_7/checkable = 1
+popup/item_7/id = 128
+script = SubResource("GDScript_31oqs")
+
+[node name="Frame" type="HBoxContainer" parent="MarkersMenu/HBox" unique_id=741511579]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarkersMenu/HBox/Frame" unique_id=1652633191]
+layout_mode = 2
+text = "Frame:"
+
+[node name="Input" type="SpinBox" parent="MarkersMenu/HBox/Frame" unique_id=1913431671 groups=["input"]]
+layout_mode = 2
+max_value = 999999.0
+editable = false
+
+[node name="Depth" type="HBoxContainer" parent="MarkersMenu/HBox" unique_id=585275542]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarkersMenu/HBox/Depth" unique_id=88353541]
+layout_mode = 2
+text = "Depth:"
+
+[node name="Input" type="SpinBox" parent="MarkersMenu/HBox/Depth" unique_id=1881517850 groups=["input"]]
+layout_mode = 2
+max_value = 1.0
+step = 0.001
+editable = false
+
+[node name="Create" type="HBoxContainer" parent="MarkersMenu/HBox" unique_id=2044428061]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="AddMarker" type="TextureButton" parent="MarkersMenu/HBox/Create" unique_id=288649862]
+layout_mode = 2
+tooltip_text = "Add Marker"
+focus_mode = 0
+texture_normal = ExtResource("11_2agkk")
+
+[node name="GenerateCycle" type="TextureButton" parent="MarkersMenu/HBox/Create" unique_id=847486909]
+layout_mode = 2
+tooltip_text = "Generate Cycle"
+focus_mode = 0
+texture_normal = ExtResource("12_ak1ar")
+
+[node name="Clipboard" type="HBoxContainer" parent="MarkersMenu/HBox" unique_id=837493063]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Copy" type="TextureButton" parent="MarkersMenu/HBox/Clipboard" unique_id=1590416783]
+layout_mode = 2
+tooltip_text = "Copy"
+focus_mode = 0
+texture_normal = ExtResource("13_2estk")
+
+[node name="Paste" type="TextureButton" parent="MarkersMenu/HBox/Clipboard" unique_id=2117019518]
+layout_mode = 2
+tooltip_text = "Paste"
+focus_mode = 0
+texture_normal = ExtResource("14_usymf")
+
+[node name="Delete" type="TextureButton" parent="MarkersMenu/HBox" unique_id=634487223]
+visible = false
+layout_mode = 2
+tooltip_text = "Delete"
+focus_mode = 0
+texture_normal = ExtResource("15_rigon")
+
+[node name="Menu" type="Panel" parent="." unique_id=1078485634]
+layout_mode = 1
+anchors_preset = -1
+anchor_bottom = 1.0
+offset_left = -300.0
+grow_vertical = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="Controls" type="VBoxContainer" parent="Menu" unique_id=1968817326]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 9.0
+offset_top = 71.0
+offset_right = 290.0
+offset_bottom = 637.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 12
+script = ExtResource("16_7m41a")
+metadata/_edit_use_anchors_ = true
+
+[node name="Record" type="Button" parent="Menu/Controls" unique_id=642351741]
+unique_name_in_owner = true
+layout_mode = 2
+focus_mode = 0
+disabled = true
+toggle_mode = true
+text = "Record"
+alignment = 0
+
+[node name="Render" type="Button" parent="Menu/Controls" unique_id=1686308199]
+layout_mode = 2
+focus_mode = 0
+disabled = true
+text = "Render"
+alignment = 0
+
+[node name="HSeparator" type="HSeparator" parent="Menu/Controls" unique_id=1712007141]
+layout_mode = 2
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="Menu/Controls" unique_id=1419826466]
+unique_name_in_owner = true
+
+[node name="Volume" type="HBoxContainer" parent="Menu/Controls" unique_id=1170855586]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Label" type="Label" parent="Menu/Controls/Volume" unique_id=415275878]
+custom_minimum_size = Vector2(125, 0)
+layout_mode = 2
+text = "Volume: 100%"
+
+[node name="Slider" type="HSlider" parent="Menu/Controls/Volume" unique_id=798811062]
+custom_minimum_size = Vector2(145, 25)
+layout_mode = 2
+focus_mode = 0
+
+[node name="Tracks" type="HBoxContainer" parent="Menu/Controls" unique_id=1493437323]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="LoadTracks" type="Button" parent="Menu/Controls/Tracks" unique_id=1325419703]
+custom_minimum_size = Vector2(28, 0)
+layout_mode = 2
+focus_mode = 0
+text = "+"
+
+[node name="CompressionNotice" type="AcceptDialog" parent="Menu/Controls/Tracks/LoadTracks" unique_id=259640256]
+oversampling_override = 1.0
+position = Vector2i(0, 36)
+size = Vector2i(400, 330)
+exclusive = false
+ok_button_text = "  OK  "
+
+[node name="VBox" type="VBoxContainer" parent="Menu/Controls/Tracks/LoadTracks/CompressionNotice" unique_id=1172543213]
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 392.0
+offset_bottom = 285.0
+theme_override_constants/separation = 25
+
+[node name="Label" type="Label" parent="Menu/Controls/Tracks/LoadTracks/CompressionNotice/VBox" unique_id=628677426]
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+
+[node name="DoNotShowCheckBox" type="CheckBox" parent="Menu/Controls/Tracks/LoadTracks/CompressionNotice/VBox" unique_id=1148964632]
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+text = "Don't show this notification again"
+
+[node name="ConversionNotice" type="AcceptDialog" parent="Menu/Controls/Tracks/LoadTracks" unique_id=1432249141]
+oversampling_override = 1.0
+position = Vector2i(0, 36)
+size = Vector2i(400, 255)
+exclusive = false
+ok_button_text = "  OK  "
+
+[node name="VBox" type="VBoxContainer" parent="Menu/Controls/Tracks/LoadTracks/ConversionNotice" unique_id=638576065]
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 392.0
+offset_bottom = 210.0
+theme_override_constants/separation = 25
+
+[node name="Label" type="Label" parent="Menu/Controls/Tracks/LoadTracks/ConversionNotice/VBox" unique_id=2127550769]
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+
+[node name="DoNotShowCheckBox" type="CheckBox" parent="Menu/Controls/Tracks/LoadTracks/ConversionNotice/VBox" unique_id=1943176056]
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+text = "Don't show this notification again"
+
+[node name="TrackSelection" type="OptionButton" parent="Menu/Controls/Tracks" unique_id=1501996220]
+custom_minimum_size = Vector2(241, 0)
+layout_mode = 2
+focus_mode = 0
+text_overrun_behavior = 2
+clip_text = true
+
+[node name="TrackControls" type="HBoxContainer" parent="Menu/Controls" unique_id=1287349246]
+layout_mode = 2
+theme_override_constants/separation = 32
+alignment = 1
+script = ExtResource("17_3llay")
+
+[node name="Play" type="TextureButton" parent="Menu/Controls/TrackControls" unique_id=1155299157]
+unique_name_in_owner = true
+layout_mode = 2
+focus_mode = 0
+disabled = true
+toggle_mode = true
+texture_normal = ExtResource("9_ymix4")
+
+[node name="Icon" type="TextureRect" parent="Menu/Controls/TrackControls/Play" unique_id=72015085]
+self_modulate = Color(0.3, 0.69, 0.31, 0.33)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -12.0
+offset_top = -25.0
+offset_right = 17.0
+offset_bottom = 25.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(14, 25)
+mouse_filter = 2
+texture = ExtResource("17_y5iiq")
+stretch_mode = 3
+
+[node name="Pause" type="TextureButton" parent="Menu/Controls/TrackControls" unique_id=80242352]
+unique_name_in_owner = true
+layout_mode = 2
+focus_mode = 0
+disabled = true
+toggle_mode = true
+texture_normal = ExtResource("9_ymix4")
+
+[node name="Icon" type="TextureRect" parent="Menu/Controls/TrackControls/Pause" unique_id=155148535]
+self_modulate = Color(0.13, 0.59, 0.95, 0.33)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -9.0
+offset_top = -25.0
+offset_right = 9.0
+offset_bottom = 25.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(9, 25)
+mouse_filter = 2
+texture = ExtResource("18_fpln1")
+stretch_mode = 3
+
+[node name="TrackSlider" type="HSlider" parent="Menu/Controls" unique_id=1479731662]
+layout_mode = 2
+focus_mode = 0
+max_value = 1.0
+step = 0.001
+editable = false
+scrollable = false
+
+[node name="HSeparator2" type="HSeparator" parent="Menu/Controls" unique_id=840016730]
+layout_mode = 2
+
+[node name="Paths" type="ItemList" parent="Menu/Controls" unique_id=1189353386]
+custom_minimum_size = Vector2(0, 250)
+layout_mode = 2
+focus_mode = 0
+allow_reselect = true
+
+[node name="EditPathFile" type="ConfirmationDialog" parent="Menu/Controls/Paths" unique_id=1967222353]
+oversampling_override = 1.0
+title = "Edit Path File"
+position = Vector2i(0, 36)
+size = Vector2i(510, 250)
+ok_button_text = "   OK   "
+cancel_button_text = " Cancel "
+script = ExtResource("21_68j5r")
+
+[node name="VBox" type="VBoxContainer" parent="Menu/Controls/Paths/EditPathFile" unique_id=1492120270]
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 502.0
+offset_bottom = 205.0
+theme_override_constants/separation = 9
+
+[node name="FileName" type="HBoxContainer" parent="Menu/Controls/Paths/EditPathFile/VBox" unique_id=1805910814]
+layout_mode = 2
+theme_override_constants/separation = 10
+alignment = 2
+
+[node name="Label" type="Label" parent="Menu/Controls/Paths/EditPathFile/VBox/FileName" unique_id=1326895240]
+layout_mode = 2
+text = "File Name:"
+
+[node name="Input" type="LineEdit" parent="Menu/Controls/Paths/EditPathFile/VBox/FileName" unique_id=1484831463]
+custom_minimum_size = Vector2(350, 0)
+layout_mode = 2
+
+[node name="PathCreator" type="HBoxContainer" parent="Menu/Controls/Paths/EditPathFile/VBox" unique_id=1486379913]
+layout_mode = 2
+theme_override_constants/separation = 10
+alignment = 2
+
+[node name="Label" type="Label" parent="Menu/Controls/Paths/EditPathFile/VBox/PathCreator" unique_id=1217283370]
+layout_mode = 2
+text = "Path Creator:"
+
+[node name="Input" type="LineEdit" parent="Menu/Controls/Paths/EditPathFile/VBox/PathCreator" unique_id=1479152784]
+custom_minimum_size = Vector2(350, 0)
+layout_mode = 2
+
+[node name="RelatedMedia" type="HBoxContainer" parent="Menu/Controls/Paths/EditPathFile/VBox" unique_id=156315520]
+layout_mode = 2
+theme_override_constants/separation = 10
+alignment = 2
+
+[node name="Label" type="Label" parent="Menu/Controls/Paths/EditPathFile/VBox/RelatedMedia" unique_id=1279296686]
+layout_mode = 2
+text = "Related Media:"
+
+[node name="Input" type="LineEdit" parent="Menu/Controls/Paths/EditPathFile/VBox/RelatedMedia" unique_id=700021508]
+custom_minimum_size = Vector2(350, 0)
+layout_mode = 2
+
+[node name="HSeparator" type="HSeparator" parent="Menu/Controls/Paths/EditPathFile/VBox" unique_id=461910568]
+layout_mode = 2
+
+[node name="Spacer" type="Control" parent="Menu/Controls/Paths/EditPathFile/VBox" unique_id=435809291]
+layout_mode = 2
+
+[node name="Actions" type="HBoxContainer" parent="Menu/Controls/Paths/EditPathFile/VBox" unique_id=1441621129]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+theme_override_constants/separation = 28
+alignment = 1
+
+[node name="Copy" type="Button" parent="Menu/Controls/Paths/EditPathFile/VBox/Actions" unique_id=207992062]
+layout_mode = 2
+text = "  Copy File  "
+
+[node name="Delete" type="Button" parent="Menu/Controls/Paths/EditPathFile/VBox/Actions" unique_id=1571032230]
+layout_mode = 2
+text = "  Delete File  "
+
+[node name="ExportFunscript" type="Button" parent="Menu/Controls/Paths/EditPathFile/VBox/Actions" unique_id=530523912]
+layout_mode = 2
+text = "  Export .funscript  "
+
+[node name="FunscriptDialog" type="ConfirmationDialog" parent="Menu/Controls/Paths/EditPathFile" unique_id=225894223]
+oversampling_override = 1.0
+title = "Export Funscript"
+position = Vector2i(0, 36)
+size = Vector2i(420, 170)
+ok_button_text = "  Export  "
+cancel_button_text = " Cancel "
+
+[node name="VBox" type="VBoxContainer" parent="Menu/Controls/Paths/EditPathFile/FunscriptDialog" unique_id=1496075241]
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 412.0
+offset_bottom = 125.0
+theme_override_constants/separation = 9
+
+[node name="FileName" type="HBoxContainer" parent="Menu/Controls/Paths/EditPathFile/FunscriptDialog/VBox" unique_id=121121289]
+layout_mode = 2
+theme_override_constants/separation = 10
+alignment = 2
+
+[node name="Label" type="Label" parent="Menu/Controls/Paths/EditPathFile/FunscriptDialog/VBox/FileName" unique_id=649713555]
+layout_mode = 2
+text = "File Name:"
+
+[node name="Input" type="LineEdit" parent="Menu/Controls/Paths/EditPathFile/FunscriptDialog/VBox/FileName" unique_id=99927911]
+custom_minimum_size = Vector2(280, 0)
+layout_mode = 2
+
+[node name="Invert" type="CheckBox" parent="Menu/Controls/Paths/EditPathFile/FunscriptDialog/VBox" unique_id=1892051767]
+layout_mode = 2
+text = "Invert positions (flip 0↔100)"
+
+[node name="CopyConfirmation" type="ConfirmationDialog" parent="Menu/Controls/Paths/EditPathFile" unique_id=730377508]
+oversampling_override = 1.0
+title = "Copy Path?"
+position = Vector2i(0, 36)
+size = Vector2i(400, 130)
+ok_button_text = "  OK  "
+cancel_button_text = " Cancel "
+
+[node name="VBox" type="VBoxContainer" parent="Menu/Controls/Paths/EditPathFile/CopyConfirmation" unique_id=2049483843]
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 392.0
+offset_bottom = 85.0
+theme_override_constants/separation = 5
+
+[node name="Label" type="Label" parent="Menu/Controls/Paths/EditPathFile/CopyConfirmation/VBox" unique_id=1583092121]
+layout_mode = 2
+text = "Name of Copy:"
+
+[node name="Input" type="LineEdit" parent="Menu/Controls/Paths/EditPathFile/CopyConfirmation/VBox" unique_id=502241539]
+layout_mode = 2
+
+[node name="DeleteConfirmation" type="ConfirmationDialog" parent="Menu/Controls/Paths/EditPathFile" unique_id=1742058832]
+oversampling_override = 1.0
+title = "Delete Path?"
+position = Vector2i(0, 36)
+ok_button_text = " DELETE "
+cancel_button_text = " Cancel "
+
+[node name="Panel" type="Panel" parent="Menu/Controls/Paths/EditPathFile" unique_id=405675279]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Options" type="VBoxContainer" parent="Menu" unique_id=623625081]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = -1
+offset_left = 9.0
+offset_top = 71.0
+offset_right = 290.0
+offset_bottom = 639.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 12
+script = ExtResource("19_c71nt")
+metadata/_edit_use_anchors_ = true
+
+[node name="DebounceTimer" type="Timer" parent="Menu/Options" unique_id=195141460]
+wait_time = 0.2
+one_shot = true
+
+[node name="PathSpeed" type="VBoxContainer" parent="Menu/Options" unique_id=600829822]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Menu/Options/PathSpeed" unique_id=130404792]
+layout_mode = 2
+text = "Path Speed: 1"
+horizontal_alignment = 1
+
+[node name="HSlider" type="HSlider" parent="Menu/Options/PathSpeed" unique_id=1925412791]
+layout_mode = 2
+focus_mode = 0
+min_value = 1.0
+max_value = 10.0
+value = 4.0
+
+[node name="PathFade" type="VBoxContainer" parent="Menu/Options" unique_id=1045032011]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Menu/Options/PathFade" unique_id=732292403]
+layout_mode = 2
+text = "Path Edge Fade: 1"
+horizontal_alignment = 1
+
+[node name="HSlider" type="HSlider" parent="Menu/Options/PathFade" unique_id=1395860022]
+layout_mode = 2
+focus_mode = 0
+max_value = 1.0
+step = 0.1
+value = 0.6
+
+[node name="PathArea" type="SpinBox" parent="Menu/Options" unique_id=647069361]
+layout_mode = 2
+min_value = 1.0
+max_value = 10000.0
+value = 200.0
+prefix = "Path Vertical Area:"
+
+[node name="PathThickness" type="SpinBox" parent="Menu/Options" unique_id=980888799]
+layout_mode = 2
+min_value = 1.0
+value = 8.0
+prefix = "Path Thickness:"
+
+[node name="RenderResolution" type="VBoxContainer" parent="Menu/Options" unique_id=742597271]
+layout_mode = 2
+script = SubResource("GDScript_575x6")
+
+[node name="Label" type="Label" parent="Menu/Options/RenderResolution" unique_id=466000839]
+layout_mode = 2
+text = "Render Resolution:"
+horizontal_alignment = 1
+
+[node name="Values" type="HBoxContainer" parent="Menu/Options/RenderResolution" unique_id=245591298]
+layout_mode = 2
+alignment = 1
+
+[node name="XLabel" type="Label" parent="Menu/Options/RenderResolution/Values" unique_id=1191953960]
+layout_mode = 2
+text = "X:"
+horizontal_alignment = 1
+
+[node name="X" type="SpinBox" parent="Menu/Options/RenderResolution/Values" unique_id=828241383]
+layout_mode = 2
+max_value = 10000.0
+value = 1920.0
+
+[node name="YLabel" type="Label" parent="Menu/Options/RenderResolution/Values" unique_id=728910070]
+layout_mode = 2
+text = "Y:"
+horizontal_alignment = 1
+
+[node name="Y" type="SpinBox" parent="Menu/Options/RenderResolution/Values" unique_id=914464382]
+layout_mode = 2
+max_value = 10000.0
+value = 300.0
+
+[node name="GamepadRemapping" type="Button" parent="Menu/Options" unique_id=1925153020]
+layout_mode = 2
+focus_mode = 0
+text = "Gamepad Remapping"
+alignment = 0
+
+[node name="GamepadRemapDialog" type="AcceptDialog" parent="Menu/Options/GamepadRemapping" unique_id=64453785]
+oversampling_override = 1.0
+position = Vector2i(0, 36)
+size = Vector2i(1000, 700)
+theme = ExtResource("33_jwkas")
+ok_button_text = "   OK   "
+script = ExtResource("33_wnxtc")
+
+[node name="VBox" type="VBoxContainer" parent="Menu/Options/GamepadRemapping/GamepadRemapDialog" unique_id=383874630]
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 992.0
+offset_bottom = 555.0
+
+[node name="Scroll" type="ScrollContainer" parent="Menu/Options/GamepadRemapping/GamepadRemapDialog/VBox" unique_id=1555051071]
+custom_minimum_size = Vector2(0, 565)
+layout_mode = 2
+
+[node name="Rows" type="VBoxContainer" parent="Menu/Options/GamepadRemapping/GamepadRemapDialog/VBox/Scroll" unique_id=742088318]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="ResetAll" type="Button" parent="Menu/Options/GamepadRemapping/GamepadRemapDialog/VBox" unique_id=1821721132]
+layout_mode = 2
+focus_mode = 0
+text = "Reset All"
+
+[node name="WaveformOptions" type="Button" parent="Menu/Options" unique_id=499146441]
+layout_mode = 2
+focus_mode = 0
+text = "Waveform Options"
+alignment = 0
+
+[node name="WaveformOptionsDialog" type="AcceptDialog" parent="Menu/Options/WaveformOptions" unique_id=1164729497]
+oversampling_override = 1.0
+title = "Waveform Options:"
+position = Vector2i(0, 36)
+size = Vector2i(400, 355)
+ok_button_text = "  OK  "
+
+[node name="VBox" type="VBoxContainer" parent="Menu/Options/WaveformOptions/WaveformOptionsDialog" unique_id=661480272]
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 392.0
+offset_bottom = 305.0
+theme_override_constants/separation = 22
+
+[node name="Scrolling" type="VBoxContainer" parent="Menu/Options/WaveformOptions/WaveformOptionsDialog/VBox" unique_id=1341012739]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="ScrollingActive" type="CheckButton" parent="Menu/Options/WaveformOptions/WaveformOptionsDialog/VBox/Scrolling" unique_id=1373234057]
+layout_mode = 2
+button_pressed = true
+text = "Scrolling Waveform"
+
+[node name="Peak" type="HBoxContainer" parent="Menu/Options/WaveformOptions/WaveformOptionsDialog/VBox/Scrolling" unique_id=1526468170]
+layout_mode = 2
+theme_override_constants/separation = 17
+
+[node name="ShowPeak" type="CheckBox" parent="Menu/Options/WaveformOptions/WaveformOptionsDialog/VBox/Scrolling/Peak" unique_id=1051380264]
+custom_minimum_size = Vector2(140, 0)
+layout_mode = 2
+text = "Show Peak"
+
+[node name="PeakColorPicker" type="ColorPickerButton" parent="Menu/Options/WaveformOptions/WaveformOptionsDialog/VBox/Scrolling/Peak" unique_id=1477573402]
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+
+[node name="RMS" type="HBoxContainer" parent="Menu/Options/WaveformOptions/WaveformOptionsDialog/VBox/Scrolling" unique_id=1179088146]
+layout_mode = 2
+theme_override_constants/separation = 17
+
+[node name="ShowRMS" type="CheckBox" parent="Menu/Options/WaveformOptions/WaveformOptionsDialog/VBox/Scrolling/RMS" unique_id=1023818576]
+custom_minimum_size = Vector2(140, 0)
+layout_mode = 2
+text = "Show RMS"
+
+[node name="RMSColorPicker" type="ColorPickerButton" parent="Menu/Options/WaveformOptions/WaveformOptionsDialog/VBox/Scrolling/RMS" unique_id=44801954]
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+
+[node name="HSeparator" type="HSeparator" parent="Menu/Options/WaveformOptions/WaveformOptionsDialog/VBox" unique_id=1221295382]
+layout_mode = 2
+
+[node name="Static" type="VBoxContainer" parent="Menu/Options/WaveformOptions/WaveformOptionsDialog/VBox" unique_id=846121384]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="StaticActive" type="CheckButton" parent="Menu/Options/WaveformOptions/WaveformOptionsDialog/VBox/Static" unique_id=1170309285]
+layout_mode = 2
+button_pressed = true
+text = "Static Waveform"
+
+[node name="Peak" type="HBoxContainer" parent="Menu/Options/WaveformOptions/WaveformOptionsDialog/VBox/Static" unique_id=1201120994]
+layout_mode = 2
+theme_override_constants/separation = 17
+
+[node name="ShowPeak" type="CheckBox" parent="Menu/Options/WaveformOptions/WaveformOptionsDialog/VBox/Static/Peak" unique_id=1209757040]
+custom_minimum_size = Vector2(140, 0)
+layout_mode = 2
+text = "Show Peak"
+
+[node name="PeakColorPicker" type="ColorPickerButton" parent="Menu/Options/WaveformOptions/WaveformOptionsDialog/VBox/Static/Peak" unique_id=62488119]
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+
+[node name="RMS" type="HBoxContainer" parent="Menu/Options/WaveformOptions/WaveformOptionsDialog/VBox/Static" unique_id=1130665830]
+layout_mode = 2
+theme_override_constants/separation = 17
+
+[node name="ShowRMS" type="CheckBox" parent="Menu/Options/WaveformOptions/WaveformOptionsDialog/VBox/Static/RMS" unique_id=750649459]
+custom_minimum_size = Vector2(140, 0)
+layout_mode = 2
+text = "Show RMS"
+
+[node name="RMSColorPicker" type="ColorPickerButton" parent="Menu/Options/WaveformOptions/WaveformOptionsDialog/VBox/Static/RMS" unique_id=361503105]
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+
+[node name="ChangeColors" type="Button" parent="Menu/Options" unique_id=2067750476]
+layout_mode = 2
+focus_mode = 0
+text = "Change Colors"
+alignment = 0
+
+[node name="GenerateFunscript" type="Button" parent="Menu/Options" unique_id=1289184778]
+layout_mode = 2
+focus_mode = 0
+text = "Generate Funscript"
+alignment = 0
+
+[node name="FileDialog" type="FileDialog" parent="Menu/Options/GenerateFunscript" unique_id=318316021]
+oversampling_override = 1.0
+title = "Open File(s)"
+position = Vector2i(0, 36)
+size = Vector2i(700, 450)
+theme = ExtResource("33_jwkas")
+theme_override_constants/thumbnail_size = 32
+file_mode = 1
+access = 2
+filters = PackedStringArray("*.bx")
+use_native_dialog = true
+option_count = 1
+option_0/name = "Inverted:"
+option_0/values = PackedStringArray("False", "True")
+
+[node name="OpenResourcesFolder" type="Button" parent="Menu/Options" unique_id=2134530544]
+layout_mode = 2
+focus_mode = 0
+text = "Open Resources Folder"
+alignment = 0
+
+[node name="DisplayMode" type="VBoxContainer" parent="Menu/Options" unique_id=1034179227]
+layout_mode = 2
+script = SubResource("GDScript_nob1l")
+
+[node name="Label" type="Label" parent="Menu/Options/DisplayMode" unique_id=184790298]
+layout_mode = 2
+text = "Display Mode:"
+horizontal_alignment = 1
+
+[node name="OptionButton" type="OptionButton" parent="Menu/Options/DisplayMode" unique_id=361389502]
+layout_mode = 2
+focus_mode = 0
+selected = 1
+item_count = 2
+popup/item_0/text = "Windowed"
+popup/item_0/id = 0
+popup/item_1/text = "Exclusive Fullscreen"
+popup/item_1/id = 1
+
+[node name="Colors" type="VBoxContainer" parent="Menu" unique_id=196533681]
+visible = false
+layout_mode = 1
+anchors_preset = -1
+offset_left = 5.0
+offset_top = 72.9999
+offset_right = 295.0
+offset_bottom = 770.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 5
+script = ExtResource("20_l7p5h")
+metadata/_edit_use_anchors_ = true
+
+[node name="Done" type="Button" parent="Menu/Colors" unique_id=1060153656]
+layout_mode = 2
+focus_mode = 0
+text = "Done"
+alignment = 0
+
+[node name="TabBar" type="TabBar" parent="Menu/Colors" unique_id=1590153520]
+layout_mode = 2
+current_tab = 0
+tab_count = 9
+tab_0/title = "Ball"
+tab_1/title = "Path"
+tab_2/title = "Backdrop"
+tab_3/title = "Top Line"
+tab_4/title = "Top Active"
+tab_5/title = "Bottom Line"
+tab_6/title = "Bottom Active"
+tab_7/title = "Hold Breath Ball"
+tab_8/title = "Hold Breath Path"
+
+[node name="ColorPicker" type="ColorPicker" parent="Menu/Colors" unique_id=1270808391]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="Version" type="Label" parent="Menu" unique_id=1831698532]
+layout_mode = 0
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 9.0
+offset_top = -29.0
+offset_right = 137.0
+offset_bottom = -5.0
+grow_vertical = 0
+theme_override_font_sizes/font_size = 17
+text = "BounceX v2.5"
+vertical_alignment = 1
+metadata/_edit_use_anchors_ = true
+
+[node name="Button" type="TextureButton" parent="Menu/Version" unique_id=2103246967]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = -0.031
+anchor_top = 0.958
+anchor_right = -0.031
+anchor_bottom = 0.958
+offset_left = -0.0319998
+offset_top = -22.992
+offset_right = 117.968
+offset_bottom = 0.00799942
+focus_mode = 0
+script = SubResource("GDScript_a4j0w")
+
+[node name="Notification" type="Panel" parent="Menu/Version/Button" unique_id=1512761840]
+visible = false
+layout_mode = 0
+offset_left = 108.0
+offset_top = -85.0
+offset_right = 292.0
+offset_bottom = 6.0
+
+[node name="Text" type="Label" parent="Menu/Version/Button/Notification" unique_id=1337961296]
+layout_mode = 0
+offset_left = 28.0
+offset_top = 1.0
+offset_right = 183.0
+offset_bottom = 55.0
+text = "Click here to see controls"
+autowrap_mode = 3
+
+[node name="Arrow" type="Label" parent="Menu/Version/Button/Notification" unique_id=938566432]
+self_modulate = Color(1, 0.933333, 0.25098, 1)
+layout_mode = 0
+offset_left = -6.0
+offset_top = 70.0
+offset_right = 49.0
+offset_bottom = 111.0
+rotation = -0.568291
+theme_override_font_sizes/font_size = 32
+text = "<<<"
+autowrap_mode = 3
+
+[node name="Header" type="Control" parent="." unique_id=1864634679]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 62.0
+grow_horizontal = 2
+mouse_filter = 2
+
+[node name="ExitButton" type="TextureButton" parent="Header" unique_id=464419231]
+self_modulate = Color(1, 0.454902, 0.454902, 0.843137)
+layout_mode = 1
+anchors_preset = -1
+offset_left = 147.0
+offset_top = 8.99998
+offset_right = 174.599
+offset_bottom = 53.0
+grow_vertical = 2
+focus_mode = 0
+texture_normal = ExtResource("9_ymix4")
+script = SubResource("GDScript_q4aw8")
+metadata/_edit_use_anchors_ = true
+
+[node name="Icon" type="TextureRect" parent="Header/ExitButton" unique_id=1363681519]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -13.0
+offset_top = -13.0
+offset_right = 13.0
+offset_bottom = 13.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("21_7sroq")
+
+[node name="OptionsButton" type="TextureButton" parent="Header" unique_id=1111841668]
+self_modulate = Color(1, 1, 0.25098, 0.8)
+layout_mode = 1
+anchors_preset = -1
+offset_left = 76.2
+offset_top = 8.99998
+offset_right = 103.8
+offset_bottom = 53.0
+grow_vertical = 2
+focus_mode = 0
+toggle_mode = true
+texture_normal = ExtResource("9_ymix4")
+script = SubResource("GDScript_sh086")
+metadata/_edit_use_anchors_ = true
+
+[node name="Icon" type="TextureRect" parent="Header/OptionsButton" unique_id=121616835]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -16.0
+offset_top = -16.0
+offset_right = 16.0
+offset_bottom = 16.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("22_ualp2")
+
+[node name="MenuButton" type="TextureButton" parent="Header" unique_id=1157866272]
+self_modulate = Color(0.454902, 1, 1, 0.635294)
+layout_mode = 1
+anchors_preset = -1
+offset_left = 5.4
+offset_top = 8.99998
+offset_right = 33.0
+offset_bottom = 53.0
+grow_vertical = 2
+focus_mode = 0
+toggle_mode = true
+texture_normal = ExtResource("9_ymix4")
+script = SubResource("GDScript_8l1ut")
+metadata/_edit_use_anchors_ = true
+
+[node name="Icon" type="TextureRect" parent="Header/MenuButton" unique_id=1715879538]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -13.0
+offset_top = -13.0
+offset_right = 13.0
+offset_bottom = 13.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("23_fa01g")
+
+[node name="Record" type="Control" parent="Header" unique_id=1191338579]
+visible = false
+layout_mode = 1
+anchors_preset = 0
+offset_left = 74.5
+offset_top = 20.5
+offset_right = 147.5
+offset_bottom = 41.5
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Label" type="Label" parent="Header/Record" unique_id=538732779]
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_top = -17.5
+offset_right = 49.0
+offset_bottom = 17.5
+grow_vertical = 2
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("24_ymjnd")
+theme_override_font_sizes/font_size = 26
+text = "REC"
+vertical_alignment = 1
+
+[node name="Icon" type="TextureRect" parent="Header/Record" unique_id=1638394232]
+modulate = Color(1, 0, 0, 1)
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -21.0
+offset_top = -10.5
+offset_bottom = 10.5
+grow_horizontal = 0
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("10_dtnc4")
+
+[node name="Play" type="Control" parent="Header" unique_id=548483790]
+visible = false
+layout_mode = 1
+anchors_preset = 0
+offset_left = 75.0
+offset_top = 20.5
+offset_right = 161.0
+offset_bottom = 41.5
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Label" type="Label" parent="Header/Play" unique_id=40927001]
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_top = -17.5
+offset_right = 49.0
+offset_bottom = 17.5
+grow_vertical = 2
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("24_ymjnd")
+theme_override_font_sizes/font_size = 26
+text = "PLAY"
+vertical_alignment = 1
+
+[node name="Icon" type="TextureRect" parent="Header/Play" unique_id=2140744428]
+modulate = Color(0, 1, 0, 1)
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -21.0
+offset_top = -10.5
+offset_bottom = 10.5
+grow_horizontal = 0
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("25_ok0dy")
+
+[node name="TrackSliderLarge" type="HSlider" parent="." unique_id=834211303]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -350.0
+offset_top = -58.0
+offset_right = 350.0
+offset_bottom = -42.0
+grow_horizontal = 2
+grow_vertical = 0
+focus_mode = 0
+max_value = 1.0
+step = 0.001
+editable = false
+
+[node name="TrackTime" type="Label" parent="TrackSliderLarge" unique_id=966893584]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -27.5
+offset_top = -23.0
+offset_right = 27.5
+offset_bottom = 4.0
+grow_horizontal = 2
+text = "00:00"
+
+[node name="GenerateCycle" type="Panel" parent="." unique_id=1382266648]
+visible = false
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -220.0
+offset_top = 74.0
+offset_right = 223.0
+offset_bottom = 309.0
+grow_horizontal = 2
+script = ExtResource("28_camxn")
+
+[node name="Title" type="Label" parent="GenerateCycle" unique_id=52703928]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -85.0
+offset_top = 2.0
+offset_right = 85.0
+offset_bottom = 31.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 24
+text = "Generate Cycle:"
+vertical_alignment = 1
+
+[node name="Inputs" type="VBoxContainer" parent="GenerateCycle" unique_id=704186546]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -203.0
+offset_top = -65.5
+offset_right = 203.0
+offset_bottom = 47.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 10
+
+[node name="Interval" type="HBoxContainer" parent="GenerateCycle/Inputs" unique_id=1493448707]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="BPM" type="HBoxContainer" parent="GenerateCycle/Inputs/Interval" unique_id=897294148]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="GenerateCycle/Inputs/Interval/BPM" unique_id=259048922]
+layout_mode = 2
+text = "BPM:"
+vertical_alignment = 1
+
+[node name="SpinBox" type="SpinBox" parent="GenerateCycle/Inputs/Interval/BPM" unique_id=2046998468]
+layout_mode = 2
+min_value = 1.0
+max_value = 720.0
+step = 0.01
+value = 120.0
+
+[node name="Label" type="Label" parent="GenerateCycle/Inputs/Interval" unique_id=2080421741]
+layout_mode = 2
+text = "/"
+
+[node name="FrameInterval" type="HBoxContainer" parent="GenerateCycle/Inputs/Interval" unique_id=288401971]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="GenerateCycle/Inputs/Interval/FrameInterval" unique_id=639011303]
+layout_mode = 2
+text = "Frame interval:"
+vertical_alignment = 1
+
+[node name="SpinBox" type="SpinBox" parent="GenerateCycle/Inputs/Interval/FrameInterval" unique_id=547012438]
+layout_mode = 2
+min_value = 5.0
+max_value = 9999.0
+value = 30.0
+
+[node name="Length" type="HBoxContainer" parent="GenerateCycle/Inputs" unique_id=1219288857]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="GenerateCycle/Inputs/Length" unique_id=1487377081]
+layout_mode = 2
+text = "Number of markers:"
+vertical_alignment = 1
+
+[node name="SpinBox" type="SpinBox" parent="GenerateCycle/Inputs/Length" unique_id=197012931]
+layout_mode = 2
+min_value = 1.0
+max_value = 9999.0
+value = 25.0
+
+[node name="Positions" type="HBoxContainer" parent="GenerateCycle/Inputs" unique_id=1034110468]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Height" type="HBoxContainer" parent="GenerateCycle/Inputs/Positions" unique_id=510007540]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="GenerateCycle/Inputs/Positions/Height" unique_id=1716433446]
+layout_mode = 2
+text = "Height:"
+vertical_alignment = 1
+
+[node name="SpinBox" type="SpinBox" parent="GenerateCycle/Inputs/Positions/Height" unique_id=2006618518]
+layout_mode = 2
+max_value = 1.0
+step = 0.01
+value = 1.0
+
+[node name="Depth" type="HBoxContainer" parent="GenerateCycle/Inputs/Positions" unique_id=1069506634]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="GenerateCycle/Inputs/Positions/Depth" unique_id=1402165078]
+layout_mode = 2
+text = "Depth:"
+vertical_alignment = 1
+
+[node name="SpinBox" type="SpinBox" parent="GenerateCycle/Inputs/Positions/Depth" unique_id=763960250]
+layout_mode = 2
+max_value = 1.0
+step = 0.01
+
+[node name="StartingPosition" type="HBoxContainer" parent="GenerateCycle/Inputs" unique_id=1466234782]
+layout_mode = 2
+theme_override_constants/separation = 40
+
+[node name="Positions" type="HBoxContainer" parent="GenerateCycle/Inputs/StartingPosition" unique_id=149887406]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="GenerateCycle/Inputs/StartingPosition/Positions" unique_id=1850095453]
+layout_mode = 2
+text = "Starting position:"
+vertical_alignment = 1
+
+[node name="OptionButton" type="OptionButton" parent="GenerateCycle/Inputs/StartingPosition/Positions" unique_id=411953703]
+layout_mode = 2
+selected = 1
+item_count = 2
+popup/item_0/text = "Top"
+popup/item_0/id = 0
+popup/item_1/text = "Bottom"
+popup/item_1/id = 1
+
+[node name="Flat" type="HBoxContainer" parent="GenerateCycle/Inputs/StartingPosition" unique_id=939350664]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="GenerateCycle/Inputs/StartingPosition/Flat" unique_id=493971019]
+layout_mode = 2
+text = "Flat:"
+vertical_alignment = 1
+
+[node name="CheckBox" type="CheckBox" parent="GenerateCycle/Inputs/StartingPosition/Flat" unique_id=977300997]
+layout_mode = 2
+
+[node name="Buttons" type="HBoxContainer" parent="GenerateCycle" unique_id=844730574]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -89.5
+offset_top = -38.0
+offset_right = 89.5
+offset_bottom = -11.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_constants/separation = 20
+
+[node name="Generate" type="Button" parent="GenerateCycle/Buttons" unique_id=2023941233]
+layout_mode = 2
+text = "Generate"
+
+[node name="Cancel" type="Button" parent="GenerateCycle/Buttons" unique_id=1646498830]
+layout_mode = 2
+text = "Cancel"
+
+[node name="InfoPanel" type="Panel" parent="." unique_id=13593172]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="KeyMap" type="TextureRect" parent="InfoPanel" unique_id=159974641]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 0.541667
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("29_dh5m7")
+expand_mode = 1
+stretch_mode = 4
+metadata/_edit_use_anchors_ = true
+
+[node name="RightClick" type="TextureRect" parent="InfoPanel" unique_id=1419739946]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.023
+anchor_top = 0.577
+anchor_right = 0.023
+anchor_bottom = 0.577
+offset_left = 0.503998
+offset_top = 0.103973
+offset_right = 300.504
+offset_bottom = 252.104
+texture = ExtResource("30_ju7a3")
+metadata/_edit_use_anchors_ = true
+
+[node name="Label" type="Label" parent="InfoPanel/RightClick" unique_id=2015173115]
+layout_mode = 0
+offset_left = 308.0
+offset_top = 143.0
+offset_right = 572.0
+offset_bottom = 197.0
+text = "Right-click on selected paths
+to show more options."
+
+[node name="VBoxContainer" type="VBoxContainer" parent="InfoPanel" unique_id=1231925574]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.550347
+anchor_top = 0.614198
+anchor_right = 1.0
+anchor_bottom = 0.722222
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 22
+metadata/_edit_use_anchors_ = true
+
+[node name="Label" type="Label" parent="InfoPanel/VBoxContainer" unique_id=332717099]
+layout_mode = 2
+text = "Rendered image sequences should be played at 60 FPS."
+autowrap_mode = 3
+
+[node name="Label2" type="Label" parent="InfoPanel/VBoxContainer" unique_id=1146803147]
+layout_mode = 2
+text = "Use Exclusive Fullscreen display mode for best performance."
+autowrap_mode = 3
+
+[node name="Button" type="Button" parent="InfoPanel" unique_id=411289437]
+custom_minimum_size = Vector2(127, 43)
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -178.0
+offset_top = -74.0
+offset_right = -51.0
+offset_bottom = -31.0
+grow_horizontal = 0
+grow_vertical = 0
+text = "BACK"
+script = SubResource("GDScript_cf1v0")
+metadata/_edit_use_anchors_ = true
+
+[node name="RenderRange" type="ConfirmationDialog" parent="." unique_id=857833770]
+title = "Render Range:"
+size = Vector2i(330, 122)
+exclusive = false
+dialog_close_on_escape = false
+script = ExtResource("26_i60md")
+
+[node name="HBox" type="HBoxContainer" parent="RenderRange" unique_id=1065965682]
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 322.0
+offset_bottom = 77.0
+theme_override_constants/separation = 172
+
+[node name="Start" type="Control" parent="RenderRange/HBox" unique_id=1736105879]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="RenderRange/HBox/Start" unique_id=662544822]
+layout_mode = 0
+offset_right = 458.0
+offset_bottom = 27.0
+text = "Starting Frame:"
+
+[node name="SpinBox" type="SpinBox" parent="RenderRange/HBox/Start" unique_id=234910343]
+layout_mode = 0
+offset_top = 31.0
+offset_right = 150.0
+offset_bottom = 62.0
+
+[node name="End" type="Control" parent="RenderRange/HBox" unique_id=1394482638]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="RenderRange/HBox/End" unique_id=1249951410]
+layout_mode = 0
+offset_right = 458.0
+offset_bottom = 27.0
+text = "Ending Frame:"
+
+[node name="SpinBox" type="SpinBox" parent="RenderRange/HBox/End" unique_id=180013453]
+layout_mode = 0
+offset_top = 31.0
+offset_right = 150.0
+offset_bottom = 62.0
+
+[node name="RenderComplete" type="AcceptDialog" parent="." unique_id=886314196]
+title = "Render Complete!"
+size = Vector2i(300, 80)
+exclusive = false
+dialog_close_on_escape = false
+script = ExtResource("27_dl3lf")
+
+[node name="MigrationDialog" type="ConfirmationDialog" parent="." unique_id=613368192]
+oversampling_override = 1.0
+title = "Import Data from Previous App Version?"
+position = Vector2i(0, 36)
+size = Vector2i(401, 361)
+ok_button_text = "Import"
+dialog_hide_on_ok = false
+cancel_button_text = "Skip"
+
+[node name="VBox" type="VBoxContainer" parent="MigrationDialog" unique_id=1402360565]
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 393.0
+offset_bottom = 316.0
+theme_override_constants/separation = 18
+
+[node name="Label" type="RichTextLabel" parent="MigrationDialog/VBox" unique_id=886164511]
+layout_mode = 2
+bbcode_enabled = true
+text = "asdf"
+fit_content = true
+scroll_active = false
+autowrap_mode = 0
+
+[node name="ImportPathsCheckBox" type="CheckBox" parent="MigrationDialog/VBox" unique_id=443841987]
+layout_mode = 2
+button_pressed = true
+text = "Import paths"
+
+[node name="ImportRendersCheckBox" type="CheckBox" parent="MigrationDialog/VBox" unique_id=1292374653]
+layout_mode = 2
+text = "Import renders (can take a long time)"
+
+[node name="DeleteCheckBox" type="CheckBox" parent="MigrationDialog/VBox" unique_id=2097576635]
+layout_mode = 2
+text = "Delete ALL original data after import"
+
+[node name="DisplayCheckBox" type="CheckBox" parent="MigrationDialog/VBox" unique_id=1982879857]
+layout_mode = 2
+text = "Don't show this again"
+
+[node name="OpenLegacyFolder" type="Button" parent="MigrationDialog/VBox" unique_id=1429995716]
+layout_mode = 2
+text = "Open legacy data folder"
+
+[node name="StatusLabel" type="RichTextLabel" parent="MigrationDialog/VBox" unique_id=2058138921]
+visible = false
+layout_mode = 2
+bbcode_enabled = true
+fit_content = true
+scroll_active = false
+autowrap_mode = 0
+
+[node name="ProgressBar" type="ProgressBar" parent="MigrationDialog/VBox" unique_id=1482377738]
+visible = false
+layout_mode = 2
+
+[connection signal="gui_input" from="." to="." method="_on_gui_input"]
+[connection signal="resized" from="." to="." method="update_display"]
+[connection signal="mouse_entered" from="Markers/Marker/Button" to="Markers" method="_on_marker_mouse_entered"]
+[connection signal="mouse_exited" from="Markers/Marker/Button" to="Markers" method="_on_marker_mouse_exited"]
+[connection signal="item_selected" from="MarkersMenu/HBox/Trans" to="Markers" method="_on_trans_selected"]
+[connection signal="item_selected" from="MarkersMenu/HBox/Ease" to="Markers" method="_on_easing_selected"]
+[connection signal="item_selected" from="MarkersMenu/HBox/EaseUp" to="Markers" method="_on_up_easing_selected"]
+[connection signal="item_selected" from="MarkersMenu/HBox/EaseDown" to="Markers" method="_on_down_easing_selected"]
+[connection signal="mouse_entered" from="MarkersMenu/HBox/Frame/Input" to="Markers" method="_on_input_mouse_entered"]
+[connection signal="mouse_exited" from="MarkersMenu/HBox/Frame/Input" to="Markers" method="_on_input_mouse_exited"]
+[connection signal="value_changed" from="MarkersMenu/HBox/Frame/Input" to="Markers" method="_on_frame_value_changed"]
+[connection signal="mouse_entered" from="MarkersMenu/HBox/Depth/Input" to="Markers" method="_on_input_mouse_entered"]
+[connection signal="mouse_exited" from="MarkersMenu/HBox/Depth/Input" to="Markers" method="_on_input_mouse_exited"]
+[connection signal="value_changed" from="MarkersMenu/HBox/Depth/Input" to="Markers" method="_on_depth_value_changed"]
+[connection signal="mouse_entered" from="MarkersMenu/HBox/Create/AddMarker" to="Markers" method="_on_add_marker_mouse_entered"]
+[connection signal="mouse_exited" from="MarkersMenu/HBox/Create/AddMarker" to="Markers" method="_on_add_marker_mouse_exited"]
+[connection signal="pressed" from="MarkersMenu/HBox/Create/AddMarker" to="Markers" method="_on_add_marker_pressed"]
+[connection signal="mouse_entered" from="MarkersMenu/HBox/Create/GenerateCycle" to="Markers" method="_on_generate_cycle_mouse_entered"]
+[connection signal="mouse_exited" from="MarkersMenu/HBox/Create/GenerateCycle" to="Markers" method="_on_generate_cycle_mouse_exited"]
+[connection signal="pressed" from="MarkersMenu/HBox/Create/GenerateCycle" to="Markers" method="_on_generate_cycle_pressed"]
+[connection signal="mouse_entered" from="MarkersMenu/HBox/Clipboard/Copy" to="Markers" method="_on_copy_mouse_entered"]
+[connection signal="mouse_exited" from="MarkersMenu/HBox/Clipboard/Copy" to="Markers" method="_on_copy_mouse_exited"]
+[connection signal="pressed" from="MarkersMenu/HBox/Clipboard/Copy" to="Markers" method="_on_copy_pressed"]
+[connection signal="mouse_entered" from="MarkersMenu/HBox/Clipboard/Paste" to="Markers" method="_on_paste_mouse_entered"]
+[connection signal="mouse_exited" from="MarkersMenu/HBox/Clipboard/Paste" to="Markers" method="_on_paste_mouse_exited"]
+[connection signal="pressed" from="MarkersMenu/HBox/Clipboard/Paste" to="Markers" method="_on_paste_pressed"]
+[connection signal="mouse_entered" from="MarkersMenu/HBox/Delete" to="Markers" method="_on_delete_mouse_entered"]
+[connection signal="mouse_exited" from="MarkersMenu/HBox/Delete" to="Markers" method="_on_delete_mouse_exited"]
+[connection signal="pressed" from="MarkersMenu/HBox/Delete" to="Markers" method="_on_delete_pressed"]
+[connection signal="toggled" from="Menu/Controls/Record" to="." method="_on_record_toggled"]
+[connection signal="pressed" from="Menu/Controls/Render" to="." method="_on_render_pressed"]
+[connection signal="value_changed" from="Menu/Controls/Volume/Slider" to="Menu/Controls" method="_on_volume_slider_value_changed"]
+[connection signal="pressed" from="Menu/Controls/Tracks/LoadTracks" to="Menu/Controls" method="_on_load_tracks_pressed"]
+[connection signal="item_selected" from="Menu/Controls/Tracks/TrackSelection" to="Menu/Controls" method="_on_track_selected"]
+[connection signal="toggled" from="Menu/Controls/Tracks/TrackSelection" to="Menu/Controls" method="_on_track_selection_toggled"]
+[connection signal="mouse_entered" from="Menu/Controls/TrackControls/Play" to="Menu/Controls/TrackControls" method="_on_play_mouse_entered"]
+[connection signal="mouse_exited" from="Menu/Controls/TrackControls/Play" to="Menu/Controls/TrackControls" method="_on_play_mouse_exited"]
+[connection signal="toggled" from="Menu/Controls/TrackControls/Play" to="." method="_on_play_toggled"]
+[connection signal="toggled" from="Menu/Controls/TrackControls/Play" to="Menu/Controls/TrackControls" method="_on_play_toggled"]
+[connection signal="mouse_entered" from="Menu/Controls/TrackControls/Pause" to="Menu/Controls/TrackControls" method="_on_pause_mouse_entered"]
+[connection signal="mouse_exited" from="Menu/Controls/TrackControls/Pause" to="Menu/Controls/TrackControls" method="_on_pause_mouse_exited"]
+[connection signal="toggled" from="Menu/Controls/TrackControls/Pause" to="Menu/Controls/TrackControls" method="_on_pause_toggled"]
+[connection signal="value_changed" from="Menu/Controls/TrackSlider" to="Menu/Controls" method="scrub"]
+[connection signal="item_clicked" from="Menu/Controls/Paths" to="Menu/Controls" method="_on_paths_item_clicked"]
+[connection signal="item_selected" from="Menu/Controls/Paths" to="Menu/Controls" method="_on_path_selected"]
+[connection signal="confirmed" from="Menu/Controls/Paths/EditPathFile" to="Menu/Controls/Paths/EditPathFile" method="_on_confirmed"]
+[connection signal="timeout" from="Menu/Options/DebounceTimer" to="Menu/Options" method="_on_debounce_timer_timeout"]
+[connection signal="value_changed" from="Menu/Options/PathSpeed/HSlider" to="Menu/Options" method="_on_path_speed_changed"]
+[connection signal="value_changed" from="Menu/Options/PathFade/HSlider" to="Menu/Options" method="_on_path_fade_value_changed"]
+[connection signal="value_changed" from="Menu/Options/PathArea" to="Menu/Options" method="_on_path_area_value_changed"]
+[connection signal="value_changed" from="Menu/Options/PathThickness" to="Menu/Options" method="_on_path_thickness_value_changed"]
+[connection signal="value_changed" from="Menu/Options/RenderResolution/Values/X" to="Menu/Options/RenderResolution" method="_on_x_value_changed"]
+[connection signal="value_changed" from="Menu/Options/RenderResolution/Values/Y" to="Menu/Options/RenderResolution" method="_on_y_value_changed"]
+[connection signal="pressed" from="Menu/Options/GamepadRemapping" to="Menu/Options" method="_on_gamepad_remapping_pressed"]
+[connection signal="pressed" from="Menu/Options/WaveformOptions" to="Menu/Options" method="_on_waveform_options_pressed"]
+[connection signal="pressed" from="Menu/Options/ChangeColors" to="Menu/Options" method="_on_change_colors_pressed"]
+[connection signal="pressed" from="Menu/Options/GenerateFunscript" to="Menu/Options" method="_on_generate_funscript_pressed"]
+[connection signal="pressed" from="Menu/Options/OpenResourcesFolder" to="Menu/Options" method="_on_open_resources_folder_pressed"]
+[connection signal="item_selected" from="Menu/Options/DisplayMode/OptionButton" to="Menu/Options/DisplayMode" method="_on_option_button_item_selected"]
+[connection signal="visibility_changed" from="Menu/Colors" to="Menu/Colors" method="_on_visibility_changed"]
+[connection signal="pressed" from="Menu/Colors/Done" to="Menu/Colors" method="_on_done_pressed"]
+[connection signal="tab_changed" from="Menu/Colors/TabBar" to="Menu/Colors" method="_on_tab_bar_tab_changed"]
+[connection signal="color_changed" from="Menu/Colors/ColorPicker" to="Menu/Colors" method="_on_color_picker_color_changed"]
+[connection signal="mouse_entered" from="Menu/Version/Button" to="Menu/Version/Button" method="_on_mouse_entered"]
+[connection signal="mouse_exited" from="Menu/Version/Button" to="Menu/Version/Button" method="_on_mouse_exited"]
+[connection signal="pressed" from="Menu/Version/Button" to="Menu/Version/Button" method="_on_pressed"]
+[connection signal="mouse_entered" from="Header/ExitButton" to="Header/ExitButton" method="_on_mouse_entered"]
+[connection signal="mouse_exited" from="Header/ExitButton" to="Header/ExitButton" method="_on_mouse_exited"]
+[connection signal="pressed" from="Header/ExitButton" to="Header/ExitButton" method="_on_pressed"]
+[connection signal="mouse_entered" from="Header/OptionsButton" to="Header/OptionsButton" method="_on_mouse_entered"]
+[connection signal="mouse_exited" from="Header/OptionsButton" to="Header/OptionsButton" method="_on_mouse_exited"]
+[connection signal="toggled" from="Header/OptionsButton" to="Header/OptionsButton" method="_on_toggled"]
+[connection signal="mouse_entered" from="Header/MenuButton" to="Header/MenuButton" method="_on_mouse_entered"]
+[connection signal="mouse_exited" from="Header/MenuButton" to="Header/MenuButton" method="_on_mouse_exited"]
+[connection signal="toggled" from="Header/MenuButton" to="Header/MenuButton" method="_on_toggled"]
+[connection signal="value_changed" from="TrackSliderLarge" to="Menu/Controls" method="scrub"]
+[connection signal="value_changed" from="GenerateCycle/Inputs/Interval/BPM/SpinBox" to="GenerateCycle" method="_on_bpm_value_changed"]
+[connection signal="value_changed" from="GenerateCycle/Inputs/Interval/FrameInterval/SpinBox" to="GenerateCycle" method="_on_frame_interval_value_changed"]
+[connection signal="pressed" from="GenerateCycle/Buttons/Generate" to="GenerateCycle" method="_on_generate_pressed"]
+[connection signal="pressed" from="GenerateCycle/Buttons/Cancel" to="GenerateCycle" method="_on_cancel_pressed"]
+[connection signal="pressed" from="InfoPanel/Button" to="InfoPanel/Button" method="_on_pressed"]
+[connection signal="about_to_popup" from="RenderRange" to="RenderRange" method="_on_about_to_popup"]
+[connection signal="canceled" from="RenderRange" to="RenderRange" method="_on_canceled"]
+[connection signal="confirmed" from="RenderRange" to="RenderRange" method="_on_confirmed"]
+[connection signal="custom_action" from="RenderComplete" to="RenderComplete" method="_on_custom_action"]

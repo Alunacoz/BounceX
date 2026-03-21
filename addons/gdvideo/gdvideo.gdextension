@@ -1,0 +1,20 @@
+[configuration]
+entry_symbol = "gdvideo_library_init"
+compatibility_minimum = "4.5"
+reloadable = true
+
+[libraries]
+linux.debug.x86_64 = "res://addons/gdvideo/bin/libgdvideo.linux.Release.x86_64.so"
+linux.release.x86_64 = "res://addons/gdvideo/bin/libgdvideo.linux.Release.x86_64.so"
+windows.debug.x86_64 = "res://addons/gdvideo/bin/libgdvideo.windows.Release.x86_64.dll"
+windows.release.x86_64 = "res://addons/gdvideo/bin/libgdvideo.windows.Release.x86_64.dll"
+macos.debug = "res://addons/gdvideo/bin/libgdvideo.macos.Release.arm64.dylib"
+macos.release = "res://addons/gdvideo/bin/libgdvideo.macos.Release.arm64.dylib"
+
+[dependencies]
+windows.debug.x86_64 = {"res://addons/gdvideo/bin/avcodec-62.dll": "", "res://addons/gdvideo/bin/avformat-62.dll": "", "res://addons/gdvideo/bin/avutil-60.dll": "", "res://addons/gdvideo/bin/swscale-9.dll": "", "res://addons/gdvideo/bin/swresample-6.dll": ""}
+windows.release.x86_64 = {"res://addons/gdvideo/bin/avcodec-62.dll": "", "res://addons/gdvideo/bin/avformat-62.dll": "", "res://addons/gdvideo/bin/avutil-60.dll": "", "res://addons/gdvideo/bin/swscale-9.dll": "", "res://addons/gdvideo/bin/swresample-6.dll": ""}
+linux.debug.x86_64 = {"res://addons/gdvideo/bin/libavcodec.so.62": "", "res://addons/gdvideo/bin/libavformat.so.62": "", "res://addons/gdvideo/bin/libavutil.so.60": "", "res://addons/gdvideo/bin/libswscale.so.9": "", "res://addons/gdvideo/bin/libswresample.so.6": ""}
+linux.release.x86_64 = {"res://addons/gdvideo/bin/libavcodec.so.62": "", "res://addons/gdvideo/bin/libavformat.so.62": "", "res://addons/gdvideo/bin/libavutil.so.60": "", "res://addons/gdvideo/bin/libswscale.so.9": "", "res://addons/gdvideo/bin/libswresample.so.6": ""}
+macos.debug = {"res://addons/gdvideo/bin/libavcodec.62.dylib": "", "res://addons/gdvideo/bin/libavformat.62.dylib": "", "res://addons/gdvideo/bin/libavutil.60.dylib": "", "res://addons/gdvideo/bin/libswscale.9.dylib": "", "res://addons/gdvideo/bin/libswresample.6.dylib": ""}
+macos.release = {"res://addons/gdvideo/bin/libavcodec.62.dylib": "", "res://addons/gdvideo/bin/libavformat.62.dylib": "", "res://addons/gdvideo/bin/libavutil.60.dylib": "", "res://addons/gdvideo/bin/libswscale.9.dylib": "", "res://addons/gdvideo/bin/libswresample.6.dylib": ""}
