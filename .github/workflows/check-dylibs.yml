@@ -1,0 +1,41 @@
+name: Check macOS dylibs
+
+# When does this run?
+# - Every push that changes files in the addon's bin/ directory
+# - Can also be triggered manually from the Actions tab
+on:
+  push:
+    paths:
+      - "addons/gdvideo/bin/*.dylib"
+  workflow_dispatch:  # manual trigger button
+
+jobs:
+  check-macos-deps:
+    # This runs on an Apple Silicon Mac (M1)
+    runs-on: macos-14
+
+    steps:
+      # Step 1: Check out the repo so we have the files
+      - uses: actions/checkout@v4
+
+      # Step 2: Verify no dylib references Homebrew or other external paths
+      - name: Check dylib dependencies
+        run: |
+          echo "Checking macOS dylibs for external dependencies..."
+          failed=0
+          for lib in addons/gdvideo/bin/*.dylib; do
+            echo ""
+            echo "=== $(basename $lib) ==="
+            otool -L "$lib"
+            if otool -L "$lib" | grep -q '/opt/homebrew\|/usr/local'; then
+              echo "FAIL: $(basename $lib) has hardcoded external dependency!"
+              failed=1
+            else
+              echo "OK"
+            fi
+          done
+          if [ $failed -eq 1 ]; then
+            exit 1
+          fi
+          echo ""
+          echo "All dylibs are clean!"
