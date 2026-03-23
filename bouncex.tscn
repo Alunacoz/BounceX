@@ -1790,6 +1790,32 @@ text = "BACK"
 script = SubResource("GDScript_cf1v0")
 metadata/_edit_use_anchors_ = true
 
+[node name="MarkersCoppied" type="Sprite2D" parent="." unique_id=1037286633]
+visible = false
+position = Vector2(500, 100)
+texture = ExtResource("13_2estk")
+offset = Vector2(-25, 0)
+
+[node name="Label" type="Label" parent="MarkersCoppied" unique_id=759725893]
+offset_left = -4.0
+offset_top = -13.0
+offset_right = 118.0
+offset_bottom = 10.0
+text = "Markers Copied"
+
+[node name="MarkersPasted" type="Sprite2D" parent="." unique_id=342293735]
+visible = false
+position = Vector2(500, 100)
+texture = ExtResource("14_usymf")
+offset = Vector2(-24, 0)
+
+[node name="Label" type="Label" parent="MarkersPasted" unique_id=1593209763]
+offset_left = -1.0
+offset_top = -11.0
+offset_right = 121.0
+offset_bottom = 12.0
+text = "Markers Pasted"
+
 [node name="RenderOptions" type="ConfirmationDialog" parent="." unique_id=857833770]
 oversampling_override = 1.0
 title = "Render Options:"
@@ -1843,7 +1869,7 @@ theme_override_constants/separation = 15
 
 [node name="Label" type="Label" parent="RenderOptions/VBox/Padding" unique_id=276487165]
 layout_mode = 2
-text = "Apply padding before/after movement:"
+text = "Apply padding at beginning/end of path:"
 horizontal_alignment = 1
 
 [node name="HBox" type="HBoxContainer" parent="RenderOptions/VBox/Padding" unique_id=1241812514]

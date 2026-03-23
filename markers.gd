@@ -540,9 +540,20 @@ func _on_copy_mouse_exited():
 	%MarkersMenu/HBox/Clipboard/Copy.self_modulate = Color.WHITE
 
 
+var _copy_tween: Tween
 func _on_copy_pressed():
 	if not selected_marker:
 		return
+
+	if _copy_tween and _copy_tween.is_valid():
+		_copy_tween.kill()
+	var sprite: Sprite2D = owner.get_node("MarkersCoppied")
+	sprite.position.x = get_viewport_rect().size.x / 2
+	sprite.modulate.a = 1.0
+	sprite.show()
+	_copy_tween = create_tween()
+	_copy_tween.tween_property(sprite, "modulate:a", 0.0, 1.6)
+	_copy_tween.tween_callback(sprite.hide)
 	
 	clipboard.clear()
 	
@@ -574,8 +585,21 @@ func _on_paste_mouse_entered():
 func _on_paste_mouse_exited():
 	%MarkersMenu/HBox/Clipboard/Paste.self_modulate = Color.WHITE
 
-
+var _paste_tween: Tween
 func _on_paste_pressed():
+	if clipboard.is_empty():
+		return
+	
+	if _paste_tween and _paste_tween.is_valid():
+		_paste_tween.kill()
+	var sprite: Sprite2D = owner.get_node("MarkersPasted")
+	sprite.position.x = get_viewport_rect().size.x / 2
+	sprite.modulate.a = 1.0
+	sprite.show()
+	_paste_tween = create_tween()
+	_paste_tween.tween_property(sprite, "modulate:a", 0.0, 1.6)
+	_paste_tween.tween_callback(sprite.hide)
+	
 	for marker in clipboard:
 		var frame = owner.frame + marker
 		var depth = clipboard[marker][0]

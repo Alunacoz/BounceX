@@ -34,9 +34,9 @@ func _on_generate_pressed():
 	for i in length - 1:
 		current_frame += frame_interval
 		create_marker(current_frame, positions[phase])
-	hide()
 	owner.input_disabled = false
 	owner.save_path()
+	hide()
 
 
 func create_marker(frame: int, depth):
@@ -59,5 +59,5 @@ func create_marker(frame: int, depth):
 
 
 func _on_cancel_pressed():
-	hide()
 	owner.input_disabled = false
+	hide()
