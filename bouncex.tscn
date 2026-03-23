@@ -27,7 +27,7 @@
 [ext_resource type="Texture2D" uid="uid://c7tcg80cl58pp" path="res://textures/Menu.svg" id="23_fa01g"]
 [ext_resource type="FontFile" uid="uid://c2wtnhu46b5xf" path="res://font/Rubik-Light.ttf" id="24_ymjnd"]
 [ext_resource type="Texture2D" uid="uid://dnlqy6ppe68nr" path="res://textures/Play Small.svg" id="25_ok0dy"]
-[ext_resource type="Script" uid="uid://cdjscsr1nq1sp" path="res://render_range.gd" id="26_i60md"]
+[ext_resource type="Script" uid="uid://cdjscsr1nq1sp" path="res://render_options.gd" id="26_i60md"]
 [ext_resource type="Script" uid="uid://cov18vyjv4ei6" path="res://render_complete.gd" id="27_dl3lf"]
 [ext_resource type="Script" uid="uid://viu0qeogdrek" path="res://generate_cycle.gd" id="28_camxn"]
 [ext_resource type="Texture2D" uid="uid://cvdu2l73nu3mw" path="res://textures/Key Map.svg" id="29_dh5m7"]
@@ -109,6 +109,7 @@ script/source = "extends TextureButton
 
 func _on_pressed():
 	var info_panel = owner.get_node('InfoPanel')
+	owner.input_disabled = true
 	info_panel.show()
 	$Notification.hide()
 	info_panel.self_modulate.a = 1.65
@@ -249,6 +250,7 @@ func ui_mouse_filter(active:bool) -> void:
 script/source = "extends Button
 
 func _on_pressed():
+	owner.input_disabled = false
 	get_parent().hide()
 "
 
@@ -1255,7 +1257,7 @@ offset_right = 137.0
 offset_bottom = -5.0
 grow_vertical = 0
 theme_override_font_sizes/font_size = 17
-text = "BounceX v2.5"
+text = "BounceX v2.5.1"
 vertical_alignment = 1
 metadata/_edit_use_anchors_ = true
 
@@ -1747,9 +1749,9 @@ to show more options."
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.550347
-anchor_top = 0.614198
+anchor_top = 0.56790143
 anchor_right = 1.0
-anchor_bottom = 0.722222
+anchor_bottom = 0.8302471
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 22
@@ -1763,6 +1765,11 @@ autowrap_mode = 3
 [node name="Label2" type="Label" parent="InfoPanel/VBoxContainer" unique_id=1146803147]
 layout_mode = 2
 text = "Use Exclusive Fullscreen display mode for best performance."
+autowrap_mode = 3
+
+[node name="Label3" type="Label" parent="InfoPanel/VBoxContainer" unique_id=1597486546]
+layout_mode = 2
+text = "Right-click on tracks in the drop-down menu to delete them."
 autowrap_mode = 3
 
 [node name="Button" type="Button" parent="InfoPanel" unique_id=411289437]
@@ -1783,51 +1790,79 @@ text = "BACK"
 script = SubResource("GDScript_cf1v0")
 metadata/_edit_use_anchors_ = true
 
-[node name="RenderRange" type="ConfirmationDialog" parent="." unique_id=857833770]
-title = "Render Range:"
-size = Vector2i(330, 122)
-exclusive = false
+[node name="RenderOptions" type="ConfirmationDialog" parent="." unique_id=857833770]
+oversampling_override = 1.0
+title = "Render Options:"
+position = Vector2i(0, 36)
+size = Vector2i(459, 265)
+ok_button_text = "  Render  "
 dialog_close_on_escape = false
+cancel_button_text = "  Cancel  "
 script = ExtResource("26_i60md")
 
-[node name="HBox" type="HBoxContainer" parent="RenderRange" unique_id=1065965682]
+[node name="VBox" type="VBoxContainer" parent="RenderOptions" unique_id=604727064]
 offset_left = 8.0
 offset_top = 8.0
-offset_right = 322.0
-offset_bottom = 77.0
-theme_override_constants/separation = 172
+offset_right = 451.0
+offset_bottom = 221.0
+theme_override_constants/separation = 15
 
-[node name="Start" type="Control" parent="RenderRange/HBox" unique_id=1736105879]
+[node name="Range" type="HBoxContainer" parent="RenderOptions/VBox" unique_id=1065965682]
+custom_minimum_size = Vector2(0, 63.775)
+layout_mode = 2
+theme_override_constants/separation = 43
+alignment = 1
+
+[node name="Start" type="VBoxContainer" parent="RenderOptions/VBox/Range" unique_id=1380454768]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="RenderRange/HBox/Start" unique_id=662544822]
-layout_mode = 0
-offset_right = 458.0
-offset_bottom = 27.0
+[node name="Label" type="Label" parent="RenderOptions/VBox/Range/Start" unique_id=662544822]
+layout_mode = 2
 text = "Starting Frame:"
 
-[node name="SpinBox" type="SpinBox" parent="RenderRange/HBox/Start" unique_id=234910343]
-layout_mode = 0
-offset_top = 31.0
-offset_right = 150.0
-offset_bottom = 62.0
-
-[node name="End" type="Control" parent="RenderRange/HBox" unique_id=1394482638]
+[node name="SpinBox" type="SpinBox" parent="RenderOptions/VBox/Range/Start" unique_id=234910343]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="RenderRange/HBox/End" unique_id=1249951410]
-layout_mode = 0
-offset_right = 458.0
-offset_bottom = 27.0
+[node name="End" type="VBoxContainer" parent="RenderOptions/VBox/Range" unique_id=1128555081]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="RenderOptions/VBox/Range/End" unique_id=1249951410]
+layout_mode = 2
 text = "Ending Frame:"
 
-[node name="SpinBox" type="SpinBox" parent="RenderRange/HBox/End" unique_id=180013453]
-layout_mode = 0
-offset_top = 31.0
-offset_right = 150.0
-offset_bottom = 62.0
+[node name="SpinBox" type="SpinBox" parent="RenderOptions/VBox/Range/End" unique_id=180013453]
+layout_mode = 2
+
+[node name="FromCurrentPos" type="CheckBox" parent="RenderOptions/VBox" unique_id=1246212291]
+layout_mode = 2
+text = "Begin render from current position"
+
+[node name="Padding" type="VBoxContainer" parent="RenderOptions/VBox" unique_id=522897900]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="Label" type="Label" parent="RenderOptions/VBox/Padding" unique_id=276487165]
+layout_mode = 2
+text = "Apply padding before/after movement:"
+horizontal_alignment = 1
+
+[node name="HBox" type="HBoxContainer" parent="RenderOptions/VBox/Padding" unique_id=1241812514]
+layout_mode = 2
+theme_override_constants/separation = 26
+alignment = 1
+
+[node name="LeadIn" type="CheckBox" parent="RenderOptions/VBox/Padding/HBox" unique_id=1495942840]
+layout_mode = 2
+button_pressed = true
+text = "Lead-In "
+
+[node name="LeadOut" type="CheckBox" parent="RenderOptions/VBox/Padding/HBox" unique_id=1427635280]
+layout_mode = 2
+button_pressed = true
+text = "Lead-Out "
 
 [node name="RenderComplete" type="AcceptDialog" parent="." unique_id=886314196]
+oversampling_override = 1.0
 title = "Render Complete!"
 size = Vector2i(300, 80)
 exclusive = false
@@ -1972,7 +2007,10 @@ layout_mode = 2
 [connection signal="pressed" from="GenerateCycle/Buttons/Generate" to="GenerateCycle" method="_on_generate_pressed"]
 [connection signal="pressed" from="GenerateCycle/Buttons/Cancel" to="GenerateCycle" method="_on_cancel_pressed"]
 [connection signal="pressed" from="InfoPanel/Button" to="InfoPanel/Button" method="_on_pressed"]
-[connection signal="about_to_popup" from="RenderRange" to="RenderRange" method="_on_about_to_popup"]
-[connection signal="canceled" from="RenderRange" to="RenderRange" method="_on_canceled"]
-[connection signal="confirmed" from="RenderRange" to="RenderRange" method="_on_confirmed"]
+[connection signal="about_to_popup" from="RenderOptions" to="RenderOptions" method="_on_about_to_popup"]
+[connection signal="canceled" from="RenderOptions" to="RenderOptions" method="_on_canceled"]
+[connection signal="confirmed" from="RenderOptions" to="RenderOptions" method="_on_confirmed"]
+[connection signal="toggled" from="RenderOptions/VBox/FromCurrentPos" to="RenderOptions" method="_on_from_current_pos_toggled"]
+[connection signal="toggled" from="RenderOptions/VBox/Padding/HBox/LeadIn" to="RenderOptions" method="_on_lead_in_toggled"]
+[connection signal="toggled" from="RenderOptions/VBox/Padding/HBox/LeadOut" to="RenderOptions" method="_on_lead_out_toggled"]
 [connection signal="custom_action" from="RenderComplete" to="RenderComplete" method="_on_custom_action"]

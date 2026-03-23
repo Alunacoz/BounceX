@@ -18,6 +18,7 @@ var path_area: int
 
 var marker_data: Dictionary
 var path_meta: Dictionary
+var path_extra: Dictionary
 
 var frame: int
 var step: int
@@ -392,9 +393,10 @@ func _on_play_toggled(button_pressed):
 
 func _on_render_pressed():
 	$Header/MenuButton.button_pressed = false
-	$RenderRange.popup_centered()
+	$RenderOptions.popup_centered()
 
-
+var apply_lead_in := true
+var apply_lead_out := true
 var active_effects: Dictionary
 @export var flash_curve: Curve
 @export var path_flash_curve: Curve
@@ -422,8 +424,6 @@ func render(starting_frame: int, ending_frame: int):
 	
 	var flash_total := 120
 	var flash_frames := 120
-	
-	var flash_active: bool
 	
 	const _auxiliary_functions := 8
 	
@@ -474,14 +474,11 @@ func render(starting_frame: int, ending_frame: int):
 	for section in _aux_sequenced:
 		aux_effects[section] = {}
 		for sequence in _aux_sequenced[section]:
-			var marker_keys = 1
 			var start_frame = marker_list[sequence[0]]
 			var end_frame = marker_list[sequence[-1]]
 			aux_effects[section][start_frame] = end_frame - start_frame
 	
 	_stop_track()
-	if is_video_track:
-		%VideoStreamPlayer.hide()
 	
 	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
 	DisplayServer.window_set_position(Vector2(0, 200))
@@ -509,8 +506,11 @@ func render(starting_frame: int, ending_frame: int):
 	
 	$Path.position.x = offset
 	$Path.clear_points()
-	
 	$Path.gradient.offsets[1] = 0.5
+	
+	if is_video_track:
+		%VideoStreamPlayer.hide()
+	
 	$TrackSliderLarge.hide()
 	
 	$WaveformStatic.hide()
@@ -530,6 +530,7 @@ func render(starting_frame: int, ending_frame: int):
 			_distance_adjust = 3
 		1:
 			_distance_adjust = 9
+	
 	var _ball_distance = path_origin.x - $Ball.position.x
 	var distance = ceil(_ball_distance / path_speed) + _distance_adjust
 	
@@ -549,8 +550,9 @@ func render(starting_frame: int, ending_frame: int):
 			_cutoff_adjust = 0
 		1:
 			_cutoff_adjust = 8
+	
 	var _path_distance = x_size + (offset * path_speed)
-	var cutoff = floor(_path_distance / path_speed) + _cutoff_adjust
+	var cutoff: int = floor(_path_distance / path_speed) + _cutoff_adjust
 	
 	place_ball(path[starting_frame])
 	path_origin.y = $Ball.position.y
@@ -559,15 +561,15 @@ func render(starting_frame: int, ending_frame: int):
 	
 	while $Path.get_point_count() < cutoff:
 		$Path.add_point(Vector2(path_origin.x + step, path_origin.y))
-		$Path.position.x -= 1 * path_speed
-		step += 1 * path_speed
+		$Path.position.x -= path_speed
+		step += path_speed
 	
 	$Path.show()
 	$Markers.hide()
 	$MarkersMenu.hide()
 	
-	for point in range(starting_frame, ending_frame + cutoff):
-		#print("SAVING: ",point," / ", (ending_frame + cutoff) - starting_frame)
+	var loop_end: int = ending_frame + (cutoff if apply_lead_out else distance)
+	for point in range(starting_frame, loop_end):
 		if point+1 < path.size() and path[point+1] > -1:
 			path_origin.y = BOTTOM + path[point+1] * (TOP - BOTTOM)
 		if point - distance < path.size() and point > distance:
@@ -591,7 +593,6 @@ func render(starting_frame: int, ending_frame: int):
 			match effect:
 				Effects.HOLD_BREATH:
 					var effect_time = active_effects[effect]
-					var total_time: int = flash_frames
 					if effect_time > flash_total:
 						if flash_frames > 0:
 							var count = 1 - flash_frames / float(flash_total)
@@ -619,12 +620,13 @@ func render(starting_frame: int, ending_frame: int):
 		await get_tree().process_frame
 		await get_tree().process_frame
 		$Path.add_point(Vector2(path_origin.x + step, path_origin.y))
-		$Path.position.x -= 1 * path_speed
-		step += 1 * path_speed
+		$Path.position.x -= path_speed
+		step += path_speed
 		while $Path.get_point_count() > cutoff:
 			$Path.remove_point(0)
-		var image = get_viewport().get_texture().get_image()
-		image.save_png(render_dir.path_join(str(point).lpad(6, "0") + ".png"))
+		if apply_lead_in or point - distance >= starting_frame:
+			var image = get_viewport().get_texture().get_image()
+			image.save_png(render_dir.path_join(str(point).lpad(6, "0") + ".png"))
 	
 	get_viewport().set_transparent_background(false)
 	$Path.gradient.offsets[1] = 1
@@ -635,6 +637,10 @@ func render(starting_frame: int, ending_frame: int):
 	if Data.config.get_value('waveform', 'static_active', true):
 		$WaveformStatic.show()
 	else:
+		$TrackSliderLarge.show()
+	
+	if is_video_track:
+		%VideoStreamPlayer.show()
 		$TrackSliderLarge.show()
 	
 	$Path.hide()
@@ -651,8 +657,6 @@ func render(starting_frame: int, ending_frame: int):
 	DisplayServer.window_set_position(window_starting_pos)
 	update_display()
 	input_disabled = false
-	if is_video_track:
-		%VideoStreamPlayer.show()
 	await get_tree().process_frame
 	await get_tree().process_frame
 	%Controls.scrub(0)

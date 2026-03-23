@@ -77,10 +77,6 @@ static var _cbr_seek_offset:  float = 0.0     # seconds sliced off the front (0 
 # ── Primary-instance tracking ─────────────────────────────────────────────────
 static var _primary = null
 
-# ── BounceX refs ──────────────────────────────────────────────────────────────
-var _bx:           Node              = null
-var _audio_player: AudioStreamPlayer = null
-
 # ── Input state (per-instance) ────────────────────────────────────────────────
 var _dragging := false
 
@@ -95,8 +91,6 @@ static var _time_font: Font = null
 # ═══════════════════════════════════════════════════════════════════════════════
 
 func _ready() -> void:
-	_bx           = Data.bx
-	_audio_player = Data.bx.get_node("Menu/Controls/AudioStreamPlayer")
 	add_to_group("WaveformView")
 	if not is_instance_valid(_primary):
 		_primary = self
@@ -112,11 +106,11 @@ func _exit_tree() -> void:
 
 
 func _process(_delta: float) -> void:
-	if not is_instance_valid(_bx):
+	if not is_instance_valid(owner):
 		return
 
 	if _primary == self:
-		var stream = _audio_player.stream
+		var stream = %AudioStreamPlayer.stream
 		if stream != _last_stream:
 			_last_stream = stream
 			if stream != null:
@@ -347,7 +341,7 @@ func _setup_decode_bus() -> void:
 	if not is_instance_valid(_decode_player):
 		_decode_player     = AudioStreamPlayer.new()
 		_decode_player.bus = DECODE_BUS_NAME
-		_bx.add_child(_decode_player)
+		owner.add_child(_decode_player)
 
 
 
@@ -480,9 +474,9 @@ func _draw_static() -> void:
 			var rms:   float = _waveform_rms[i]
 			draw_rect(Rect2(x, cy - rms * half_h, maxf(1.0, bar_w), maxf(1.0, rms * h)), _rms_col)
 
-	var total: float = float(_bx.path.size())
+	var total: float = float(owner.path.size())
 	if total > 0.0:
-		var t:  float = _bx.frame / total
+		var t:  float = owner.frame / total
 		var px: float = t * vp_w
 		draw_rect(Rect2(0.0, 0.0, px, h), Color(0.0, 0.0, 0.0, 0.25))
 		draw_line(Vector2(px, 0.0), Vector2(px, h), Color.YELLOW, 2.0)
@@ -499,31 +493,31 @@ func _draw_scrolling() -> void:
 	if _waveform_hi.size() < _scroll_cols or _scroll_cols == 0:
 		return
 	var vp_w:   float = get_viewport_rect().size.x
-	var top_y:  float = _bx.TOP
-	var bot_y:  float = _bx.BOTTOM
+	var top_y:  float = owner.TOP
+	var bot_y:  float = owner.BOTTOM
 	var h:      float = bot_y - top_y
 	if h <= 0.0:
 		return
 	var cy:     float = top_y + h * 0.5
 	var half_h: float = h * 0.5
 	var cx:     float = vp_w * 0.5
-	var pspeed: float = _bx.path_speed
-	var total:  float = float(_bx.path.size())
+	var pspeed: float = owner.path_speed
+	var total:  float = float(owner.path.size())
 	if total <= 0.0 or pspeed <= 0.0:
 		return
 
 	var peak_c := Color(_peak_col.r, _peak_col.g, _peak_col.b, scrolling_alpha)
 	var rms_c  := Color(_rms_col.r,  _rms_col.g,  _rms_col.b,  scrolling_alpha)
 
-	var first_col: int = clampi(int((_bx.frame - cx / pspeed) / total * _scroll_cols), 0, _scroll_cols - 1)
-	var last_col:  int = clampi(int((_bx.frame + (vp_w - cx) / pspeed) / total * _scroll_cols), 0, _scroll_cols - 1)
+	var first_col: int = clampi(int((owner.frame - cx / pspeed) / total * _scroll_cols), 0, _scroll_cols - 1)
+	var last_col:  int = clampi(int((owner.frame + (vp_w - cx) / pspeed) / total * _scroll_cols), 0, _scroll_cols - 1)
 	if _computing:
 		last_col = mini(last_col, _decoded_col)
 
 	for col in range(first_col, last_col + 1):
 		var f0: float = float(col)     / _scroll_cols * total
 		var f1: float = float(col + 1) / _scroll_cols * total
-		var x0: float = cx + (f0 - _bx.frame) * pspeed
+		var x0: float = cx + (f0 - owner.frame) * pspeed
 		var w:  float = maxf(1.0, (f1 - f0) * pspeed)
 		if show_peak:
 			var lo: float = _waveform_hi[col].x
@@ -543,16 +537,15 @@ func _input(event: InputEvent) -> void:
 		return
 	if display_mode != DisplayMode.STATIC:
 		return
-	if not _has_waveform or not is_instance_valid(_bx):
+	if not _has_waveform or not is_instance_valid(owner):
 		return
-	if _bx.get("input_disabled"):
+	if owner.input_disabled:
 		return
-
 	var rect := Rect2(global_position, Vector2(get_viewport_rect().size.x, view_height))
 
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		if event.pressed and rect.has_point(event.global_position) \
-				and not get_viewport().gui_get_hovered_control():
+			and not owner.get_node("Menu").is_ancestor_of(get_viewport().gui_get_hovered_control()):
 			_dragging = true
 			_seek_to(event.global_position.x)
 			get_viewport().set_input_as_handled()
@@ -568,7 +561,7 @@ func _input(event: InputEvent) -> void:
 ## Frame / marker / ball sync is the caller's responsibility.
 func seek_audio(t: float) -> void:
 	if _cbr_avg_bytes > 0.0 and _mp3_data.size() > 0 and \
-	   _audio_player.stream is AudioStreamMP3:
+	   %AudioStreamPlayer.stream is AudioStreamMP3:
 		# Fast path: slice from CBR byte offset (no frame sync — caller handles it)
 		# Clamp to 0.5s before end to avoid invalid slices near EOF
 		if _stream_duration > 0.5:
@@ -583,35 +576,35 @@ func seek_audio(t: float) -> void:
 			byte_off += 1
 		# Not enough data remaining for a valid frame — too close to end of file
 		if byte_off >= _mp3_data.size() - int(_cbr_avg_bytes):
-			if _audio_player.playing and not _audio_player.stream_paused:
-				_audio_player.stream_paused = true
+			if %AudioStreamPlayer.playing and not %AudioStreamPlayer.stream_paused:
+				%AudioStreamPlayer.stream_paused = true
 			return
 		_cbr_seek_offset = t * _stream_duration
 		var sliced := AudioStreamMP3.new()
 		sliced.data = _mp3_data.slice(byte_off)
-		var was_paused := _audio_player.stream_paused or not _audio_player.playing
+		var was_paused: bool = %AudioStreamPlayer.stream_paused or not %AudioStreamPlayer.playing
 		_last_stream = sliced
-		_audio_player.stream = sliced
-		_audio_player.play(0.0)
+		%AudioStreamPlayer.stream = sliced
+		%AudioStreamPlayer.play(0.0)
 		if was_paused:
-			_audio_player.stream_paused = true
+			%AudioStreamPlayer.stream_paused = true
 	else:
 		# Fallback: instant for WAV, O(position) for VBR MP3
 		# NOTE: do NOT call Controls.scrub() here — callers own their UI sync,
 		# and scrub() itself now calls seek_audio(), so that would recurse.
-		if not is_instance_valid(_bx) or _stream_duration <= 0.0:
+		if not is_instance_valid(owner) or _stream_duration <= 0.0:
 			return
 		_cbr_seek_offset = 0.0
 		var pos := t * _stream_duration
-		if not _audio_player.playing:
-			_audio_player.play(pos)
-			_audio_player.stream_paused = true
-		elif _audio_player.stream_paused:
-			_audio_player.stream_paused = false
-			_audio_player.seek(pos)
-			_audio_player.stream_paused = true
+		if not %AudioStreamPlayer.playing:
+			%AudioStreamPlayer.play(pos)
+			%AudioStreamPlayer.stream_paused = true
+		elif %AudioStreamPlayer.stream_paused:
+			%AudioStreamPlayer.stream_paused = false
+			%AudioStreamPlayer.seek(pos)
+			%AudioStreamPlayer.stream_paused = true
 		else:
-			_audio_player.seek(pos)
+			%AudioStreamPlayer.seek(pos)
 
 
 func _seek_to(screen_x: float) -> void:
@@ -624,23 +617,22 @@ func _seek_to(screen_x: float) -> void:
 ## Sync BounceX frame, markers, ball, and UI to normalized position t.
 ## Extracted so seek_audio() can stay audio-only.
 func _fast_mp3_seek_sync(t: float) -> void:
-	var total: int = _bx.path.size()
+	var total: int = owner.path.size()
 	if total < 10:
 		return
-	_bx.frame = clampi(int(t * total), 0, total - 10)
-	_bx.get_node("Markers").position.x = \
-		_bx.get_viewport_rect().size.x * 0.5 - float(_bx.frame) * _bx.path_speed
-	if total > _bx.frame + 1 and _bx.path[_bx.frame + 1] > -1:
-		_bx.place_ball(_bx.path[_bx.frame + 1])
+	owner.frame = clampi(int(t * total), 0, total - 10)
+	%Markers.position.x = \
+		owner.get_viewport_rect().size.x * 0.5 - float(owner.frame) * owner.path_speed
+	if total > owner.frame + 1 and owner.path[owner.frame + 1] > -1:
+		owner.place_ball(owner.path[owner.frame + 1])
 	# Sync sliders, time display, and marker UI
 	# (WAV gets this from scrub() in seek_audio fallback; MP3 fast path skips scrub)
-	var controls = _bx.get_node("%Controls")
-	var t_sync := float(_bx.frame) / float(total - 1)
+	var t_sync := float(owner.frame) / float(total - 1)
 	var playback_pos := t_sync * _stream_duration
 	var seconds := str(int(playback_pos) % 60).lpad(2, "0")
 	var minutes := str(int(playback_pos) / 60).lpad(2, "0")
-	for bar in [_bx.get_node("Menu/Controls/TrackSlider"), _bx.get_node("TrackSliderLarge")]:
+	for bar in [%Controls/TrackSlider, %TrackSliderLarge]:
 		bar.set_value(t_sync)
-	_bx.get_node("TrackSliderLarge/TrackTime").text = minutes + ":" + seconds
-	controls.update_marker_menu()
-	_bx.get_node("Markers").position_markers()
+	%TrackSliderLarge/TrackTime.text = minutes + ":" + seconds
+	%Controls.update_marker_menu()
+	%Markers.position_markers()

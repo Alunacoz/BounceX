@@ -87,7 +87,9 @@ func save_path(file_path: String = get_file_path()) -> void:
 	var markers := {}
 	for f in bx.marker_data:
 		markers[str(f)] = bx.marker_data[f]
-	file.store_line(JSON.stringify({"meta": bx.path_meta, "markers": markers}))
+	var data := {"meta": bx.path_meta, "markers": markers}
+	data.merge(bx.path_extra)
+	file.store_line(JSON.stringify(data))
 	file.close()
 
 
@@ -102,6 +104,10 @@ func load_path(file_path: String) -> void:
 		return
 	bx.path_meta = parsed.get("meta", {})
 	bx.path_meta["related_media"] = file_path.get_base_dir().get_file().get_basename()
+	bx.path_extra = {}
+	for key in parsed:
+		if key != "meta" and key != "markers":
+			bx.path_extra[key] = parsed[key]
 	var marker_data := {}
 	for key in parsed["markers"]:
 		marker_data[int(key)] = parsed["markers"][key]
