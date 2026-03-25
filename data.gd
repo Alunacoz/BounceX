@@ -84,10 +84,7 @@ func save_path(file_path: String = get_file_path()) -> void:
 	var file := FileAccess.open(file_path, FileAccess.WRITE)
 	if not file:
 		return
-	var markers := {}
-	for f in bx.marker_data:
-		markers[str(f)] = bx.marker_data[f]
-	var data := {"meta": bx.path_meta, "markers": markers}
+	var data := {"meta": bx.path_meta, "markers": bx.marker_data}
 	data.merge(bx.path_extra)
 	file.store_line(JSON.stringify(data))
 	file.close()

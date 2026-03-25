@@ -56,7 +56,7 @@ func _ready():
 		$PathArea.value = value
 	else:
 		_on_path_area_value_changed($PathArea.value)
-
+	
 	call_deferred("_load_waveform_config")
 
 
@@ -65,7 +65,7 @@ func _on_path_speed_changed(value):
 	if %Controls.get_node('Paths').is_anything_selected():
 		%Controls.unload_all(true)
 		%Controls.last_path_index = -1
-	$PathSpeed/Label.text = "Path Speed: " + str(value)
+	$PathSpeed/Label.text = "Path Speed: " + str(int(value))
 	Data.set_config('path', 'path_speed', value)
 
 
@@ -74,14 +74,6 @@ func _on_path_fade_value_changed(value):
 	owner.get_node('Path').gradient.colors[0].a = 1 - value
 	owner.get_node('Path').gradient.colors[2].a = 1 - value
 	Data.set_config('path', 'path_fade', value)
-
-
-func _on_change_colors_pressed():
-	var colors: Node = get_node('../Colors')
-	colors.get_node('TabBar').current_tab = 0
-	colors._on_tab_bar_tab_changed(0)
-	colors.show()
-	hide()
 
 
 func _on_path_area_value_changed(value):
@@ -100,12 +92,6 @@ func _on_path_thickness_value_changed(value):
 
 func _on_debounce_timer_timeout():
 	%Markers.connect_all_markers()
-
-func _on_open_resources_folder_pressed() -> void:
-	OS.shell_open(Data.base_dir)
-
-
-var _waveform_opts_connected := false
 
 
 func _load_waveform_config() -> void:
@@ -177,87 +163,28 @@ func _input(event):
 		get_viewport().gui_get_focus_owner().release_focus()
 
 
-func _on_waveform_options_pressed() -> void:
-	var dialog   := $WaveformOptions/WaveformOptionsDialog
-	var wv_nodes := get_tree().get_nodes_in_group("WaveformView")
-	var wv_scroll: Node = null
-	var wv_static: Node = null
-	for n in wv_nodes:
-		if   n.display_mode == 1: wv_scroll = n  # SCROLLING
-		elif n.display_mode == 0: wv_static = n  # STATIC
-
-	var d_scroll := dialog.get_node("VBox/Scrolling")
-	var d_static := dialog.get_node("VBox/Static")
-
-	# Sync UI to current state on every open
-	if wv_scroll:
-		d_scroll.get_node("ScrollingActive").button_pressed    = wv_scroll.visible
-		d_scroll.get_node("Peak/ShowPeak").button_pressed      = wv_scroll.show_peak
-		d_scroll.get_node("Peak/PeakColorPicker").color        = wv_scroll._peak_col
-		d_scroll.get_node("RMS/ShowRMS").button_pressed        = wv_scroll.show_rms
-		d_scroll.get_node("RMS/RMSColorPicker").color          = wv_scroll._rms_col
-	if wv_static:
-		d_static.get_node("StaticActive").button_pressed       = wv_static.visible
-		d_static.get_node("Peak/ShowPeak").button_pressed      = wv_static.show_peak
-		d_static.get_node("Peak/PeakColorPicker").color        = wv_static._peak_col
-		d_static.get_node("RMS/ShowRMS").button_pressed        = wv_static.show_rms
-		d_static.get_node("RMS/RMSColorPicker").color          = wv_static._rms_col
-
-	# Wire up signals once
-	if not _waveform_opts_connected:
-		_waveform_opts_connected = true
-
-		if wv_scroll:
-			d_scroll.get_node("ScrollingActive").toggled.connect(func(on: bool):
-				wv_scroll.visible = on
-				Data.set_config('waveform', 'scroll_active', on))
-			d_scroll.get_node("Peak/ShowPeak").toggled.connect(func(on: bool):
-				wv_scroll.show_peak = on
-				Data.set_config('waveform', 'scroll_show_peak', on))
-			d_scroll.get_node("Peak/PeakColorPicker").color_changed.connect(func(c: Color):
-				wv_scroll._peak_col = c
-				Data.set_config('waveform', 'scroll_peak_color', c))
-			d_scroll.get_node("RMS/ShowRMS").toggled.connect(func(on: bool):
-				wv_scroll.show_rms = on
-				Data.set_config('waveform', 'scroll_show_rms', on))
-			d_scroll.get_node("RMS/RMSColorPicker").color_changed.connect(func(c: Color):
-				wv_scroll._rms_col = c
-				Data.set_config('waveform', 'scroll_rms_color', c))
-
-		if wv_static:
-			d_static.get_node("StaticActive").toggled.connect(func(on: bool):
-				wv_static.visible = on and not owner.is_video_track
-				%TrackSliderLarge.visible = not on or owner.is_video_track
-				Data.set_config('waveform', 'static_active', on))
-			d_static.get_node("Peak/ShowPeak").toggled.connect(func(on: bool):
-				wv_static.show_peak = on
-				Data.set_config('waveform', 'static_show_peak', on))
-			d_static.get_node("Peak/PeakColorPicker").color_changed.connect(func(c: Color):
-				wv_static._peak_col = c
-				Data.set_config('waveform', 'static_peak_color', c))
-			d_static.get_node("RMS/ShowRMS").toggled.connect(func(on: bool):
-				wv_static.show_rms = on
-				Data.set_config('waveform', 'static_show_rms', on))
-			d_static.get_node("RMS/RMSColorPicker").color_changed.connect(func(c: Color):
-				wv_static._rms_col = c
-				Data.set_config('waveform', 'static_rms_color', c))
-
-	dialog.popup_centered()
-
-
 func _on_gamepad_remapping_pressed() -> void:
 	$GamepadRemapping/GamepadRemapDialog.popup_centered()
 
 
-func _on_generate_funscript_pressed() -> void:
-	if not $GenerateFunscript/FileDialog.files_selected.is_connected(_on_funscript_files_selected):
-		$GenerateFunscript/FileDialog.files_selected.connect(_on_funscript_files_selected)
-	$GenerateFunscript/FileDialog.current_dir = Data.paths_dir
-	$GenerateFunscript/FileDialog.popup_centered()
+func _on_waveform_options_pressed() -> void:
+	$WaveformOptions/WaveformOptionsDialog.popup_centered()
+
+
+func _on_change_colors_pressed():
+	$ChangeColors/ColorOptionsDialog.popup_centered()
+	$ChangeColors/ColorOptionsDialog.position = Vector2(8, 100)
+
+
+func _on_export_funscripts_pressed() -> void:
+	if not $ExportFunscripts/FileDialog.files_selected.is_connected(_on_funscript_files_selected):
+		$ExportFunscripts/FileDialog.files_selected.connect(_on_funscript_files_selected)
+	$ExportFunscripts/FileDialog.current_dir = Data.paths_dir
+	$ExportFunscripts/FileDialog.popup_centered()
 
 
 func _on_funscript_files_selected(paths: PackedStringArray) -> void:
-	var invert: bool = $GenerateFunscript/FileDialog.get_selected_options()["Inverted:"] == 1
+	var invert: bool = $ExportFunscripts/FileDialog.get_selected_options()["Inverted:"] == 1
 	var count := 0
 	var exported_paths := []
 	for bx_path in paths:
@@ -301,3 +228,7 @@ func _on_funscript_files_selected(paths: PackedStringArray) -> void:
 		add_child(dialog)
 		dialog.confirmed.connect(dialog.queue_free)
 		dialog.popup_centered()
+
+
+func _on_open_resources_folder_pressed() -> void:
+	OS.shell_open(Data.base_dir)

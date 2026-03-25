@@ -1,6 +1,6 @@
 [gd_resource type="Theme" format=3 uid="uid://4ddly4r83yek"]
 
-[ext_resource type="FontFile" uid="uid://c2wtnhu46b5xf" path="res://font/Rubik-Light.ttf" id="1_flfqj"]
+[ext_resource type="FontFile" uid="uid://c2wtnhu46b5xf" path="res://font/rubik_light.ttf" id="1_flfqj"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fvgel"]
 bg_color = Color(0.6, 0.6, 0.6, 0)

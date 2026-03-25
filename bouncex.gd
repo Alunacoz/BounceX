@@ -69,7 +69,7 @@ func _physics_process(delta):
 				%Play.button_pressed = false
 				$Header/Play.hide()
 				$Header/Record.hide()
-	if not $Menu/Colors.is_visible_in_tree():
+	if not %Options/ChangeColors/ColorOptionsDialog.is_visible():
 		line_colors(frame)
 	if %Record.button_pressed:
 		if frame < path.size() - 1:

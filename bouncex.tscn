@@ -4,34 +4,35 @@
 [ext_resource type="Script" uid="uid://1d8amukvl8x1" path="res://bouncex.gd" id="2_3llay"]
 [ext_resource type="Curve" uid="uid://brt3xnflwm2r" path="res://curves/ball_flash_curve.tres" id="3_wnxtc"]
 [ext_resource type="Curve" uid="uid://dl3hfhb1q3xfn" path="res://curves/path_flash_curve.tres" id="4_jwkas"]
-[ext_resource type="Texture2D" uid="uid://bcdbk4tsjnisc" path="res://textures/Square.svg" id="5_ewps7"]
-[ext_resource type="Texture2D" uid="uid://404qr06t6u7x" path="res://textures/Line.svg" id="6_68j5r"]
+[ext_resource type="Texture2D" uid="uid://bcdbk4tsjnisc" path="res://textures/square.svg" id="5_ewps7"]
+[ext_resource type="Texture2D" uid="uid://404qr06t6u7x" path="res://textures/line.svg" id="6_68j5r"]
 [ext_resource type="Script" uid="uid://bepne8rumac7s" path="res://markers.gd" id="7_5q7av"]
-[ext_resource type="Texture2D" uid="uid://bius3v0napj7c" path="res://textures/Ball.svg" id="8_5ek1g"]
-[ext_resource type="Texture2D" uid="uid://bkabq6ivbs23x" path="res://textures/Circle.svg" id="9_ymix4"]
-[ext_resource type="Texture2D" uid="uid://cbwqw7m1wqj64" path="res://textures/Dot.svg" id="10_dtnc4"]
-[ext_resource type="Texture2D" uid="uid://bgcpkp1078rc6" path="res://textures/Add Marker.svg" id="11_2agkk"]
-[ext_resource type="Texture2D" uid="uid://qn8b5b6gg863" path="res://textures/Generate Cycle.svg" id="12_ak1ar"]
-[ext_resource type="Texture2D" uid="uid://1uor7ar7yyam" path="res://textures/Copy.svg" id="13_2estk"]
-[ext_resource type="Texture2D" uid="uid://dndicopykmmg2" path="res://textures/Paste.svg" id="14_usymf"]
-[ext_resource type="Texture2D" uid="uid://c13twlshihhp5" path="res://textures/Delete.svg" id="15_rigon"]
+[ext_resource type="Texture2D" uid="uid://bius3v0napj7c" path="res://textures/ball.svg" id="8_5ek1g"]
+[ext_resource type="Texture2D" uid="uid://bkabq6ivbs23x" path="res://textures/circle.svg" id="9_ymix4"]
+[ext_resource type="Texture2D" uid="uid://cbwqw7m1wqj64" path="res://textures/dot.svg" id="10_dtnc4"]
+[ext_resource type="Texture2D" uid="uid://bgcpkp1078rc6" path="res://textures/add_marker.svg" id="11_2agkk"]
+[ext_resource type="Texture2D" uid="uid://qn8b5b6gg863" path="res://textures/generate_cycle.svg" id="12_ak1ar"]
+[ext_resource type="Texture2D" uid="uid://1uor7ar7yyam" path="res://textures/copy.svg" id="13_2estk"]
+[ext_resource type="Texture2D" uid="uid://dndicopykmmg2" path="res://textures/paste.svg" id="14_usymf"]
+[ext_resource type="Texture2D" uid="uid://c13twlshihhp5" path="res://textures/delete.svg" id="15_rigon"]
 [ext_resource type="Script" uid="uid://cny60f56edcqg" path="res://controls.gd" id="16_7m41a"]
 [ext_resource type="Script" uid="uid://diomic0v27cwt" path="res://track_controls.gd" id="17_3llay"]
-[ext_resource type="Texture2D" uid="uid://bqgebmq2ks1mj" path="res://textures/Play.svg" id="17_y5iiq"]
-[ext_resource type="Texture2D" uid="uid://dnc4n3dtd5v83" path="res://textures/Pause.svg" id="18_fpln1"]
+[ext_resource type="Texture2D" uid="uid://bqgebmq2ks1mj" path="res://textures/play.svg" id="17_y5iiq"]
+[ext_resource type="Texture2D" uid="uid://dnc4n3dtd5v83" path="res://textures/pause.svg" id="18_fpln1"]
 [ext_resource type="Script" uid="uid://nsl3o8yvg3sa" path="res://options.gd" id="19_c71nt"]
-[ext_resource type="Script" uid="uid://47ckroob8soh" path="res://colors.gd" id="20_l7p5h"]
-[ext_resource type="Texture2D" uid="uid://cdlwfv4b2xdt7" path="res://textures/X.svg" id="21_7sroq"]
+[ext_resource type="Texture2D" uid="uid://cdlwfv4b2xdt7" path="res://textures/x.svg" id="21_7sroq"]
 [ext_resource type="Script" uid="uid://bti7gegvmhi6s" path="res://edit_path_file.gd" id="21_68j5r"]
-[ext_resource type="Texture2D" uid="uid://bmlus4dohtrmw" path="res://textures/Gear.svg" id="22_ualp2"]
-[ext_resource type="Texture2D" uid="uid://c7tcg80cl58pp" path="res://textures/Menu.svg" id="23_fa01g"]
-[ext_resource type="FontFile" uid="uid://c2wtnhu46b5xf" path="res://font/Rubik-Light.ttf" id="24_ymjnd"]
-[ext_resource type="Texture2D" uid="uid://dnlqy6ppe68nr" path="res://textures/Play Small.svg" id="25_ok0dy"]
+[ext_resource type="Texture2D" uid="uid://bmlus4dohtrmw" path="res://textures/gear.svg" id="22_ualp2"]
+[ext_resource type="Texture2D" uid="uid://c7tcg80cl58pp" path="res://textures/menu.svg" id="23_fa01g"]
+[ext_resource type="FontFile" uid="uid://c2wtnhu46b5xf" path="res://font/rubik_light.ttf" id="24_ymjnd"]
+[ext_resource type="Texture2D" uid="uid://dnlqy6ppe68nr" path="res://textures/play_small.svg" id="25_ok0dy"]
+[ext_resource type="Script" uid="uid://cs8e11rq4uo12" path="res://waveform_options.gd" id="26_5ek1g"]
+[ext_resource type="Script" uid="uid://chconvffhrc22" path="res://color_options.gd" id="26_5q7av"]
 [ext_resource type="Script" uid="uid://cdjscsr1nq1sp" path="res://render_options.gd" id="26_i60md"]
 [ext_resource type="Script" uid="uid://cov18vyjv4ei6" path="res://render_complete.gd" id="27_dl3lf"]
 [ext_resource type="Script" uid="uid://viu0qeogdrek" path="res://generate_cycle.gd" id="28_camxn"]
-[ext_resource type="Texture2D" uid="uid://cvdu2l73nu3mw" path="res://textures/Key Map.svg" id="29_dh5m7"]
-[ext_resource type="Texture2D" uid="uid://4gt7poc6r8ta" path="res://textures/Right Click.png" id="30_ju7a3"]
+[ext_resource type="Texture2D" uid="uid://cvdu2l73nu3mw" path="res://textures/key_map.svg" id="29_dh5m7"]
+[ext_resource type="Texture2D" uid="uid://4gt7poc6r8ta" path="res://textures/right_click.png" id="30_ju7a3"]
 [ext_resource type="Script" uid="uid://b2dh4aoxsqaro" path="res://waveform_view.gd" id="31_avrwg"]
 [ext_resource type="Theme" uid="uid://cmg45ext3ht7" path="res://theme_basic.tres" id="33_jwkas"]
 [ext_resource type="Script" uid="uid://uib12yuil3uo" path="res://gamepad_remap.gd" id="33_wnxtc"]
@@ -572,13 +573,15 @@ theme_override_constants/separation = 8
 
 [node name="Copy" type="TextureButton" parent="MarkersMenu/HBox/Clipboard" unique_id=1590416783]
 layout_mode = 2
-tooltip_text = "Copy"
+tooltip_text = "Copy
+(Ctrl+C)"
 focus_mode = 0
 texture_normal = ExtResource("13_2estk")
 
 [node name="Paste" type="TextureButton" parent="MarkersMenu/HBox/Clipboard" unique_id=2117019518]
 layout_mode = 2
-tooltip_text = "Paste"
+tooltip_text = "Paste
+(Ctrl+V)"
 focus_mode = 0
 texture_normal = ExtResource("14_usymf")
 
@@ -1076,12 +1079,13 @@ title = "Waveform Options:"
 position = Vector2i(0, 36)
 size = Vector2i(400, 355)
 ok_button_text = "  OK  "
+script = ExtResource("26_5ek1g")
 
 [node name="VBox" type="VBoxContainer" parent="Menu/Options/WaveformOptions/WaveformOptionsDialog" unique_id=661480272]
 offset_left = 8.0
 offset_top = 8.0
 offset_right = 392.0
-offset_bottom = 305.0
+offset_bottom = 310.0
 theme_override_constants/separation = 22
 
 [node name="Scrolling" type="VBoxContainer" parent="Menu/Options/WaveformOptions/WaveformOptionsDialog/VBox" unique_id=1341012739]
@@ -1163,13 +1167,170 @@ focus_mode = 0
 text = "Change Colors"
 alignment = 0
 
-[node name="GenerateFunscript" type="Button" parent="Menu/Options" unique_id=1289184778]
+[node name="ColorOptionsDialog" type="AcceptDialog" parent="Menu/Options/ChangeColors" unique_id=283237109]
+oversampling_override = 1.0
+title = "Color Options:"
+position = Vector2i(0, 36)
+size = Vector2i(460, 260)
+ok_button_text = "   OK   "
+script = ExtResource("26_5q7av")
+
+[node name="VBox" type="VBoxContainer" parent="Menu/Options/ChangeColors/ColorOptionsDialog" unique_id=1322000542]
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 452.0
+offset_bottom = 215.0
+theme_override_constants/separation = 18
+
+[node name="Backdrop" type="HBoxContainer" parent="Menu/Options/ChangeColors/ColorOptionsDialog/VBox" unique_id=1242704452]
+layout_mode = 2
+theme_override_constants/separation = 17
+
+[node name="Label" type="Label" parent="Menu/Options/ChangeColors/ColorOptionsDialog/VBox/Backdrop" unique_id=1653987568]
+custom_minimum_size = Vector2(120, 0)
+layout_mode = 2
+text = "Backdrop:"
+horizontal_alignment = 2
+
+[node name="ColorPicker" type="ColorPickerButton" parent="Menu/Options/ChangeColors/ColorOptionsDialog/VBox/Backdrop" unique_id=572252050]
+custom_minimum_size = Vector2(32, 0)
+layout_mode = 2
+
+[node name="Ball" type="HBoxContainer" parent="Menu/Options/ChangeColors/ColorOptionsDialog/VBox" unique_id=1200835181]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="BallBase" type="HBoxContainer" parent="Menu/Options/ChangeColors/ColorOptionsDialog/VBox/Ball" unique_id=1551787459]
+layout_mode = 2
+theme_override_constants/separation = 17
+
+[node name="Label" type="Label" parent="Menu/Options/ChangeColors/ColorOptionsDialog/VBox/Ball/BallBase" unique_id=1925720509]
+custom_minimum_size = Vector2(120, 0)
+layout_mode = 2
+text = "Ball:"
+horizontal_alignment = 2
+
+[node name="ColorPicker" type="ColorPickerButton" parent="Menu/Options/ChangeColors/ColorOptionsDialog/VBox/Ball/BallBase" unique_id=2073242589]
+custom_minimum_size = Vector2(32, 0)
+layout_mode = 2
+
+[node name="BallHoldBreath" type="HBoxContainer" parent="Menu/Options/ChangeColors/ColorOptionsDialog/VBox/Ball" unique_id=1922588133]
+layout_mode = 2
+theme_override_constants/separation = 17
+
+[node name="Label" type="Label" parent="Menu/Options/ChangeColors/ColorOptionsDialog/VBox/Ball/BallHoldBreath" unique_id=2058686973]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+text = "Ball (Hold Breath):"
+horizontal_alignment = 2
+
+[node name="ColorPicker" type="ColorPickerButton" parent="Menu/Options/ChangeColors/ColorOptionsDialog/VBox/Ball/BallHoldBreath" unique_id=1398411210]
+custom_minimum_size = Vector2(32, 0)
+layout_mode = 2
+
+[node name="Path" type="HBoxContainer" parent="Menu/Options/ChangeColors/ColorOptionsDialog/VBox" unique_id=816652304]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="PathBase" type="HBoxContainer" parent="Menu/Options/ChangeColors/ColorOptionsDialog/VBox/Path" unique_id=1994073325]
+layout_mode = 2
+theme_override_constants/separation = 17
+
+[node name="Label" type="Label" parent="Menu/Options/ChangeColors/ColorOptionsDialog/VBox/Path/PathBase" unique_id=448454123]
+custom_minimum_size = Vector2(120, 0)
+layout_mode = 2
+text = "Path:"
+horizontal_alignment = 2
+
+[node name="ColorPicker" type="ColorPickerButton" parent="Menu/Options/ChangeColors/ColorOptionsDialog/VBox/Path/PathBase" unique_id=884793972]
+custom_minimum_size = Vector2(32, 0)
+layout_mode = 2
+
+[node name="PathHoldBreath" type="HBoxContainer" parent="Menu/Options/ChangeColors/ColorOptionsDialog/VBox/Path" unique_id=1741284729]
+layout_mode = 2
+theme_override_constants/separation = 17
+
+[node name="Label" type="Label" parent="Menu/Options/ChangeColors/ColorOptionsDialog/VBox/Path/PathHoldBreath" unique_id=2121115088]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+text = "Path (Hold Breath):"
+horizontal_alignment = 2
+
+[node name="ColorPicker" type="ColorPickerButton" parent="Menu/Options/ChangeColors/ColorOptionsDialog/VBox/Path/PathHoldBreath" unique_id=1490059609]
+custom_minimum_size = Vector2(32, 0)
+layout_mode = 2
+
+[node name="TopLine" type="HBoxContainer" parent="Menu/Options/ChangeColors/ColorOptionsDialog/VBox" unique_id=1673672338]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="TopLineBase" type="HBoxContainer" parent="Menu/Options/ChangeColors/ColorOptionsDialog/VBox/TopLine" unique_id=1496967968]
+layout_mode = 2
+theme_override_constants/separation = 17
+
+[node name="Label" type="Label" parent="Menu/Options/ChangeColors/ColorOptionsDialog/VBox/TopLine/TopLineBase" unique_id=933576850]
+custom_minimum_size = Vector2(120, 0)
+layout_mode = 2
+text = "Top Line:"
+horizontal_alignment = 2
+
+[node name="ColorPicker" type="ColorPickerButton" parent="Menu/Options/ChangeColors/ColorOptionsDialog/VBox/TopLine/TopLineBase" unique_id=259516816]
+custom_minimum_size = Vector2(32, 0)
+layout_mode = 2
+
+[node name="TopLineActive" type="HBoxContainer" parent="Menu/Options/ChangeColors/ColorOptionsDialog/VBox/TopLine" unique_id=682852146]
+layout_mode = 2
+theme_override_constants/separation = 17
+
+[node name="Label" type="Label" parent="Menu/Options/ChangeColors/ColorOptionsDialog/VBox/TopLine/TopLineActive" unique_id=734327938]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+text = "Top Line (Active):"
+horizontal_alignment = 2
+
+[node name="ColorPicker" type="ColorPickerButton" parent="Menu/Options/ChangeColors/ColorOptionsDialog/VBox/TopLine/TopLineActive" unique_id=911586010]
+custom_minimum_size = Vector2(32, 0)
+layout_mode = 2
+
+[node name="BottomLine" type="HBoxContainer" parent="Menu/Options/ChangeColors/ColorOptionsDialog/VBox" unique_id=150459536]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="BottomLineBase" type="HBoxContainer" parent="Menu/Options/ChangeColors/ColorOptionsDialog/VBox/BottomLine" unique_id=1946161482]
+layout_mode = 2
+theme_override_constants/separation = 17
+
+[node name="Label" type="Label" parent="Menu/Options/ChangeColors/ColorOptionsDialog/VBox/BottomLine/BottomLineBase" unique_id=2141455193]
+custom_minimum_size = Vector2(120, 0)
+layout_mode = 2
+text = "Bottom Line:"
+horizontal_alignment = 2
+
+[node name="ColorPicker" type="ColorPickerButton" parent="Menu/Options/ChangeColors/ColorOptionsDialog/VBox/BottomLine/BottomLineBase" unique_id=629186971]
+custom_minimum_size = Vector2(32, 0)
+layout_mode = 2
+
+[node name="BottomLineActive" type="HBoxContainer" parent="Menu/Options/ChangeColors/ColorOptionsDialog/VBox/BottomLine" unique_id=1501244731]
+layout_mode = 2
+theme_override_constants/separation = 17
+
+[node name="Label" type="Label" parent="Menu/Options/ChangeColors/ColorOptionsDialog/VBox/BottomLine/BottomLineActive" unique_id=470760444]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+text = "Bottom Line (Active):"
+horizontal_alignment = 2
+
+[node name="ColorPicker" type="ColorPickerButton" parent="Menu/Options/ChangeColors/ColorOptionsDialog/VBox/BottomLine/BottomLineActive" unique_id=821751528]
+custom_minimum_size = Vector2(32, 0)
+layout_mode = 2
+
+[node name="ExportFunscripts" type="Button" parent="Menu/Options" unique_id=1289184778]
 layout_mode = 2
 focus_mode = 0
-text = "Generate Funscript"
+text = "Export Funscripts"
 alignment = 0
 
-[node name="FileDialog" type="FileDialog" parent="Menu/Options/GenerateFunscript" unique_id=318316021]
+[node name="FileDialog" type="FileDialog" parent="Menu/Options/ExportFunscripts" unique_id=318316021]
 oversampling_override = 1.0
 title = "Open File(s)"
 position = Vector2i(0, 36)
@@ -1208,44 +1369,6 @@ popup/item_0/text = "Windowed"
 popup/item_0/id = 0
 popup/item_1/text = "Exclusive Fullscreen"
 popup/item_1/id = 1
-
-[node name="Colors" type="VBoxContainer" parent="Menu" unique_id=196533681]
-visible = false
-layout_mode = 1
-anchors_preset = -1
-offset_left = 5.0
-offset_top = 72.9999
-offset_right = 295.0
-offset_bottom = 770.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_constants/separation = 5
-script = ExtResource("20_l7p5h")
-metadata/_edit_use_anchors_ = true
-
-[node name="Done" type="Button" parent="Menu/Colors" unique_id=1060153656]
-layout_mode = 2
-focus_mode = 0
-text = "Done"
-alignment = 0
-
-[node name="TabBar" type="TabBar" parent="Menu/Colors" unique_id=1590153520]
-layout_mode = 2
-current_tab = 0
-tab_count = 9
-tab_0/title = "Ball"
-tab_1/title = "Path"
-tab_2/title = "Backdrop"
-tab_3/title = "Top Line"
-tab_4/title = "Top Active"
-tab_5/title = "Bottom Line"
-tab_6/title = "Bottom Active"
-tab_7/title = "Hold Breath Ball"
-tab_8/title = "Hold Breath Path"
-
-[node name="ColorPicker" type="ColorPicker" parent="Menu/Colors" unique_id=1270808391]
-layout_mode = 2
-size_flags_horizontal = 4
 
 [node name="Version" type="Label" parent="Menu" unique_id=1831698532]
 layout_mode = 0
@@ -1790,32 +1913,6 @@ text = "BACK"
 script = SubResource("GDScript_cf1v0")
 metadata/_edit_use_anchors_ = true
 
-[node name="MarkersCoppied" type="Sprite2D" parent="." unique_id=1037286633]
-visible = false
-position = Vector2(500, 100)
-texture = ExtResource("13_2estk")
-offset = Vector2(-25, 0)
-
-[node name="Label" type="Label" parent="MarkersCoppied" unique_id=759725893]
-offset_left = -4.0
-offset_top = -13.0
-offset_right = 118.0
-offset_bottom = 10.0
-text = "Markers Copied"
-
-[node name="MarkersPasted" type="Sprite2D" parent="." unique_id=342293735]
-visible = false
-position = Vector2(500, 100)
-texture = ExtResource("14_usymf")
-offset = Vector2(-24, 0)
-
-[node name="Label" type="Label" parent="MarkersPasted" unique_id=1593209763]
-offset_left = -1.0
-offset_top = -11.0
-offset_right = 121.0
-offset_bottom = 12.0
-text = "Markers Pasted"
-
 [node name="RenderOptions" type="ConfirmationDialog" parent="." unique_id=857833770]
 oversampling_override = 1.0
 title = "Render Options:"
@@ -1952,6 +2049,32 @@ autowrap_mode = 0
 visible = false
 layout_mode = 2
 
+[node name="MarkersCopied" type="Sprite2D" parent="." unique_id=1037286633]
+visible = false
+position = Vector2(500, 100)
+texture = ExtResource("13_2estk")
+offset = Vector2(-25, 0)
+
+[node name="Label" type="Label" parent="MarkersCopied" unique_id=759725893]
+offset_left = -4.0
+offset_top = -13.0
+offset_right = 118.0
+offset_bottom = 10.0
+text = "Markers Copied"
+
+[node name="MarkersPasted" type="Sprite2D" parent="." unique_id=342293735]
+visible = false
+position = Vector2(500, 100)
+texture = ExtResource("14_usymf")
+offset = Vector2(-24, 0)
+
+[node name="Label" type="Label" parent="MarkersPasted" unique_id=1593209763]
+offset_left = -1.0
+offset_top = -11.0
+offset_right = 121.0
+offset_bottom = 12.0
+text = "Markers Pasted"
+
 [connection signal="gui_input" from="." to="." method="_on_gui_input"]
 [connection signal="resized" from="." to="." method="update_display"]
 [connection signal="mouse_entered" from="Markers/Marker/Button" to="Markers" method="_on_marker_mouse_entered"]
@@ -2008,13 +2131,9 @@ layout_mode = 2
 [connection signal="pressed" from="Menu/Options/GamepadRemapping" to="Menu/Options" method="_on_gamepad_remapping_pressed"]
 [connection signal="pressed" from="Menu/Options/WaveformOptions" to="Menu/Options" method="_on_waveform_options_pressed"]
 [connection signal="pressed" from="Menu/Options/ChangeColors" to="Menu/Options" method="_on_change_colors_pressed"]
-[connection signal="pressed" from="Menu/Options/GenerateFunscript" to="Menu/Options" method="_on_generate_funscript_pressed"]
+[connection signal="pressed" from="Menu/Options/ExportFunscripts" to="Menu/Options" method="_on_export_funscripts_pressed"]
 [connection signal="pressed" from="Menu/Options/OpenResourcesFolder" to="Menu/Options" method="_on_open_resources_folder_pressed"]
 [connection signal="item_selected" from="Menu/Options/DisplayMode/OptionButton" to="Menu/Options/DisplayMode" method="_on_option_button_item_selected"]
-[connection signal="visibility_changed" from="Menu/Colors" to="Menu/Colors" method="_on_visibility_changed"]
-[connection signal="pressed" from="Menu/Colors/Done" to="Menu/Colors" method="_on_done_pressed"]
-[connection signal="tab_changed" from="Menu/Colors/TabBar" to="Menu/Colors" method="_on_tab_bar_tab_changed"]
-[connection signal="color_changed" from="Menu/Colors/ColorPicker" to="Menu/Colors" method="_on_color_picker_color_changed"]
 [connection signal="mouse_entered" from="Menu/Version/Button" to="Menu/Version/Button" method="_on_mouse_entered"]
 [connection signal="mouse_exited" from="Menu/Version/Button" to="Menu/Version/Button" method="_on_mouse_exited"]
 [connection signal="pressed" from="Menu/Version/Button" to="Menu/Version/Button" method="_on_pressed"]

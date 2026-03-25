@@ -481,7 +481,7 @@ func _draw_static() -> void:
 		draw_rect(Rect2(0.0, 0.0, px, h), Color(0.0, 0.0, 0.0, 0.25))
 		draw_line(Vector2(px, 0.0), Vector2(px, h), Color.YELLOW, 2.0)
 		if not _time_font:
-			_time_font = load("res://font/Rubik-Light.ttf")
+			_time_font = load("res://font/rubik_light.ttf")
 		var playback_pos := t * _stream_duration
 		var time_text := str(int(playback_pos) / 60).lpad(2, "0") + ":" + \
 						 str(int(playback_pos) % 60).lpad(2, "0")

@@ -547,7 +547,7 @@ func _on_copy_pressed():
 
 	if _copy_tween and _copy_tween.is_valid():
 		_copy_tween.kill()
-	var sprite: Sprite2D = owner.get_node("MarkersCoppied")
+	var sprite: Sprite2D = owner.get_node("MarkersCopied")
 	sprite.position.x = get_viewport_rect().size.x / 2
 	sprite.modulate.a = 1.0
 	sprite.show()
@@ -625,6 +625,7 @@ func _on_paste_pressed():
 			node.get_node('Button/Selected').hide()
 		selected_multi_markers.clear()
 	
+	place_ball_on_path()
 	owner.save_path()
 
 
