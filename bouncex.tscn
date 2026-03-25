@@ -166,7 +166,6 @@ func _on_toggled(button_pressed):
 	else:
 		owner.input_disabled = false
 		self_modulate = 'ffff40cc'
-		owner.get_node('Menu/Colors').hide()
 		%Options.hide()
 		%Controls.show()
 "
@@ -230,7 +229,6 @@ func _on_toggled(button_pressed):
 		self_modulate = '74ffffa1'
 		owner.input_disabled = false
 		tween.tween_callback(ui_mouse_filter.bind(false)).set_delay(0.3)
-		tween.tween_callback(menu.get_node('Colors').hide).set_delay(0.3)
 	tween.tween_property(menu, 'position:x', menu_pos, 0.25)
 	tween.tween_property(options_button, 'position:x', options_pos, 0.3)
 	tween.tween_property(options_button, 'modulate:a', alpha, 0.3)
