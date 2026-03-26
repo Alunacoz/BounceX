@@ -108,7 +108,7 @@ func _exit_tree() -> void:
 func _process(_delta: float) -> void:
 	if not is_instance_valid(owner):
 		return
-
+	
 	if _primary == self:
 		var stream = %AudioStreamPlayer.stream
 		if stream != _last_stream:
@@ -117,11 +117,10 @@ func _process(_delta: float) -> void:
 				_start_decode(stream)
 			else:
 				_clear_waveform()
-
+	
 		if _computing and _capture_effect != null:
 			_drain_capture()
-
-
+	
 	if _has_waveform or _computing:
 		queue_redraw()
 
@@ -142,42 +141,42 @@ func _clear_waveform() -> void:
 	_has_waveform    = false
 	_computing       = false
 	_decoded_col     = 0
-
+	
 	_mp3_data        = PackedByteArray()
 	_cbr_avg_bytes   = 0.0
 	_cbr_seek_offset = 0.0
-
+	
 	if is_instance_valid(_decode_player) and _decode_player.playing:
 		_decode_player.stop()
-
+	
 	queue_redraw()
 
 
 func _init_arrays() -> void:
 	_scroll_cols = clampi(int(ceil(_stream_duration * 60.0)), 1, MAX_SCROLL_COLS)
-
+	
 	_waveform.resize(NUM_COLS)
 	_waveform_rms.resize(NUM_COLS)
 	_rms_sum_sq_lo.resize(NUM_COLS)
 	_rms_count_lo.resize(NUM_COLS)
-
+	
 	_waveform_hi.resize(_scroll_cols)
 	_waveform_rms_hi.resize(_scroll_cols)
 	_rms_sum_sq_hi.resize(_scroll_cols)
 	_rms_count_hi.resize(_scroll_cols)
-
+	
 	for i in NUM_COLS:
 		_waveform[i]      = Vector2.ZERO
 		_waveform_rms[i]  = 0.0
 		_rms_sum_sq_lo[i] = 0.0
 		_rms_count_lo[i]  = 0.0
-
+	
 	for i in _scroll_cols:
 		_waveform_hi[i]     = Vector2.ZERO
 		_waveform_rms_hi[i] = 0.0
 		_rms_sum_sq_hi[i]   = 0.0
 		_rms_count_hi[i]    = 0.0
-
+	
 	_decoded_col  = 0
 	_has_waveform = false
 
@@ -188,7 +187,7 @@ func _start_decode(stream) -> void:
 	if _stream_duration <= 0.0:
 		return
 	_init_arrays()
-
+	
 	if stream is AudioStreamWAV:
 		_decode_wav(stream)
 	else:
@@ -210,7 +209,7 @@ func _decode_wav(stream: AudioStreamWAV) -> void:
 	var data: PackedByteArray = stream.data
 	var fmt:  int             = stream.format
 	var ch:   int             = 2 if stream.stereo else 1
-
+	
 	if fmt != AudioStreamWAV.FORMAT_8_BITS and fmt != AudioStreamWAV.FORMAT_16_BITS:
 		_computing = true
 		_setup_decode_bus()
@@ -218,9 +217,9 @@ func _decode_wav(stream: AudioStreamWAV) -> void:
 		_decode_player.pitch_scale = DECODE_PITCH
 		_decode_player.play()
 		return
-
+	
 	var num_samples: int = data.size() / (ch * (2 if fmt == AudioStreamWAV.FORMAT_16_BITS else 1))
-
+	
 	for col in _scroll_cols:
 		var f0:    int   = col * num_samples / _scroll_cols
 		var f1:    int   = (col + 1) * num_samples / _scroll_cols
@@ -229,7 +228,7 @@ func _decode_wav(stream: AudioStreamWAV) -> void:
 		var sqsum: float = 0.0
 		var count: int   = 0
 		var step:  int   = max(1, (f1 - f0) / 32)
-
+	
 		for f in range(f0, f1, step):
 			var s: float
 			if fmt == AudioStreamWAV.FORMAT_8_BITS:
@@ -244,11 +243,11 @@ func _decode_wav(stream: AudioStreamWAV) -> void:
 			mx    = maxf(mx, s)
 			sqsum += s * s
 			count += 1
-
+	
 		_waveform_hi[col] = Vector2(mn, mx)
 		if count > 0:
 			_waveform_rms_hi[col] = sqrt(sqsum / count)
-
+	
 	for lo_col in NUM_COLS:
 		var hi0: int   = lo_col * _scroll_cols / NUM_COLS
 		var hi1: int   = (lo_col + 1) * _scroll_cols / NUM_COLS
@@ -264,7 +263,7 @@ func _decode_wav(stream: AudioStreamWAV) -> void:
 		_waveform[lo_col] = Vector2(mn, mx)
 		if count > 0:
 			_waveform_rms[lo_col] = rsum / count
-
+	
 	_has_waveform = true
 
 
@@ -277,40 +276,39 @@ func _drain_capture() -> void:
 			_computing    = false
 			_has_waveform = true
 		return
-
+	
 	var frames  := _capture_effect.get_buffer(available)
 	var pos     := _decode_player.get_playback_position()
 	var hi_end  := mini(int(pos / _stream_duration * _scroll_cols), _scroll_cols - 1)
 	var lo_end  := mini(int(pos / _stream_duration * NUM_COLS),     NUM_COLS - 1)
-
+	
 	for i in frames.size():
 		var t: float = float(i) / frames.size()
-
+	
 		var hi_col: int = _decoded_col + int(t * max(0, hi_end - _decoded_col)) \
 						  if hi_end > _decoded_col else _decoded_col
 		hi_col = clampi(hi_col, 0, _scroll_cols - 1)
 		var lo_col: int = clampi(hi_col * NUM_COLS / _scroll_cols, 0, NUM_COLS - 1)
-
+	
 		var s: float = (frames[i].x + frames[i].y) * 0.5
-
+	
 		_waveform_hi[hi_col]   = Vector2(minf(_waveform_hi[hi_col].x, s), maxf(_waveform_hi[hi_col].y, s))
 		_rms_sum_sq_hi[hi_col] = _rms_sum_sq_hi[hi_col] + s * s
 		_rms_count_hi[hi_col]  = _rms_count_hi[hi_col]  + 1.0
 		if _rms_count_hi[hi_col] > 0.0:
 			_waveform_rms_hi[hi_col] = sqrt(_rms_sum_sq_hi[hi_col] / _rms_count_hi[hi_col])
-
+	
 		_waveform[lo_col]      = Vector2(minf(_waveform[lo_col].x, s), maxf(_waveform[lo_col].y, s))
 		_rms_sum_sq_lo[lo_col] = _rms_sum_sq_lo[lo_col] + s * s
 		_rms_count_lo[lo_col]  = _rms_count_lo[lo_col]  + 1.0
 		if _rms_count_lo[lo_col] > 0.0:
 			_waveform_rms[lo_col] = sqrt(_rms_sum_sq_lo[lo_col] / _rms_count_lo[lo_col])
-
+	
 	_decoded_col  = hi_end
 	_has_waveform = true
-
+	
 	if not _decode_player.playing:
 		_computing = false
-
 
 
 # ── Bus setup ─────────────────────────────────────────────────────────────────
@@ -337,12 +335,11 @@ func _setup_decode_bus() -> void:
 		_capture_effect               = AudioEffectCapture.new()
 		_capture_effect.buffer_length = 0.1
 		AudioServer.add_bus_effect(_decode_bus_idx, _capture_effect)
-
+	
 	if not is_instance_valid(_decode_player):
 		_decode_player     = AudioStreamPlayer.new()
 		_decode_player.bus = DECODE_BUS_NAME
 		owner.add_child(_decode_player)
-
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -463,7 +460,7 @@ func _draw_static() -> void:
 	var bar_w:  float = vp_w / NUM_COLS
 	var n_ready: int  = clampi(int(float(_decoded_col) / float(maxi(_scroll_cols, 1)) * NUM_COLS), \
 							   0, NUM_COLS) if _computing else NUM_COLS
-
+	
 	for i in n_ready:
 		var x: float = i * bar_w
 		if show_peak:
@@ -473,7 +470,7 @@ func _draw_static() -> void:
 		if show_rms:
 			var rms:   float = _waveform_rms[i]
 			draw_rect(Rect2(x, cy - rms * half_h, maxf(1.0, bar_w), maxf(1.0, rms * h)), _rms_col)
-
+	
 	var total: float = float(owner.path.size())
 	if total > 0.0:
 		var t:  float = owner.frame / total
@@ -505,15 +502,15 @@ func _draw_scrolling() -> void:
 	var total:  float = float(owner.path.size())
 	if total <= 0.0 or pspeed <= 0.0:
 		return
-
+	
 	var peak_c := Color(_peak_col.r, _peak_col.g, _peak_col.b, scrolling_alpha)
 	var rms_c  := Color(_rms_col.r,  _rms_col.g,  _rms_col.b,  scrolling_alpha)
-
+	
 	var first_col: int = clampi(int((owner.frame - cx / pspeed) / total * _scroll_cols), 0, _scroll_cols - 1)
 	var last_col:  int = clampi(int((owner.frame + (vp_w - cx) / pspeed) / total * _scroll_cols), 0, _scroll_cols - 1)
 	if _computing:
 		last_col = mini(last_col, _decoded_col)
-
+	
 	for col in range(first_col, last_col + 1):
 		var f0: float = float(col)     / _scroll_cols * total
 		var f1: float = float(col + 1) / _scroll_cols * total
@@ -542,7 +539,7 @@ func _input(event: InputEvent) -> void:
 	if owner.input_disabled:
 		return
 	var rect := Rect2(global_position, Vector2(get_viewport_rect().size.x, view_height))
-
+	
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		if event.pressed and rect.has_point(event.global_position) \
 			and not owner.get_node("Menu").is_ancestor_of(get_viewport().gui_get_hovered_control()):
@@ -551,7 +548,7 @@ func _input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 		elif not event.pressed:
 			_dragging = false
-
+	
 	elif event is InputEventMouseMotion and _dragging:
 		_seek_to(event.global_position.x)
 		get_viewport().set_input_as_handled()

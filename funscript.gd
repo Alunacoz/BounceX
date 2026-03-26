@@ -9,7 +9,7 @@ static func export(marker_data: Dictionary, path_meta: Dictionary, out_path: Str
 		var at := int(frame * (1000.0 / 60.0))
 		var pos := clampi(int(round(marker[0] * 100.0)), 0, 100)
 		actions.append({"at": at, "pos": pos})
-
+	
 	var funscript := {
 		"version": "1.0",
 		"inverted": invert,
@@ -29,7 +29,7 @@ static func export(marker_data: Dictionary, path_meta: Dictionary, out_path: Str
 			"video_url": ""
 		}
 	}
-
+	
 	var file := FileAccess.open(out_path, FileAccess.WRITE)
 	if file:
 		file.store_line(JSON.stringify(funscript))

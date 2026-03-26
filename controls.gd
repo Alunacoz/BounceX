@@ -29,6 +29,8 @@ func _on_track_popup_input(event: InputEvent) -> void:
 	popup.hide()
 	var dialog := ConfirmationDialog.new()
 	dialog.title = "Delete Track"
+	dialog.ok_button_text = " Delete "
+	dialog.cancel_button_text = " Cancel "
 	dialog.dialog_text = "Delete \"%s\"?\n\nThe audio file will be removed from your Tracks folder.\n\nPath files and renders for this track will be kept." % track_name
 	add_child(dialog)
 	dialog.confirmed.connect(func():
@@ -92,7 +94,7 @@ func scrub(value: float) -> void:
 	var track_duration: float
 	if owner.is_video_track:
 		track_duration = %VideoStreamPlayer.get_stream_length()
-		var pos := track_duration * value
+		var pos := maxf(track_duration * value, 0.05)
 		_video_scrub_pending = pos
 		_video_scrub_timer.start()
 	else:
@@ -161,9 +163,10 @@ func _on_track_selection_toggled(button_pressed: bool) -> void:
 
 
 func load_tracks() -> void:
-	var dir      := DirAccess.open(Data.tracks_dir)
-	var selected = $Tracks/TrackSelection.selected
-	$Tracks/TrackSelection.clear()
+	var dir := DirAccess.open(Data.tracks_dir)
+	var sel := $Tracks/TrackSelection
+	var selected_name:String = sel.get_item_text(sel.selected) if sel.selected >= 0 else ""
+	sel.clear()
 	if not dir:
 		return
 	var files: PackedStringArray
@@ -177,8 +180,14 @@ func load_tracks() -> void:
 	dir.list_dir_end()
 	files.sort()
 	for f in files:
-		$Tracks/TrackSelection.add_item(f)
-	$Tracks/TrackSelection.selected = selected
+		sel.add_item(f)
+	for i in sel.item_count:
+		if sel.get_item_text(i) == selected_name:
+			sel.selected = i
+			return
+	sel.selected = -1
+	$Paths.clear()
+	_hide_waveforms()
 
 
 func _on_track_selected(index: int) -> void:
@@ -209,7 +218,7 @@ func _on_track_selected(index: int) -> void:
 		wv.invalidate_duration()
 	for slider in [$TrackSlider, %TrackSliderLarge]:
 		slider.editable = true
-	if not Data.config.get_value('waveform', 'scroll_active', true):
+	if not Data.config.get_value('waveform', 'static_active', true):
 		%TrackSliderLarge.show()
 	$TrackControls/Play.button_pressed = false
 	$TrackControls/Play.disabled = false

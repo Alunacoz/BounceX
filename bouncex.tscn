@@ -275,6 +275,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 expand = true
 script = ExtResource("video_player_script")
 
@@ -1092,6 +1093,7 @@ theme_override_constants/separation = 20
 
 [node name="ScrollingActive" type="CheckButton" parent="Menu/Options/WaveformOptions/WaveformOptionsDialog/VBox/Scrolling" unique_id=1373234057]
 layout_mode = 2
+focus_mode = 0
 button_pressed = true
 text = "Scrolling Waveform"
 
@@ -1102,11 +1104,13 @@ theme_override_constants/separation = 17
 [node name="ShowPeak" type="CheckBox" parent="Menu/Options/WaveformOptions/WaveformOptionsDialog/VBox/Scrolling/Peak" unique_id=1051380264]
 custom_minimum_size = Vector2(140, 0)
 layout_mode = 2
+focus_mode = 0
 text = "Show Peak"
 
 [node name="PeakColorPicker" type="ColorPickerButton" parent="Menu/Options/WaveformOptions/WaveformOptionsDialog/VBox/Scrolling/Peak" unique_id=1477573402]
 custom_minimum_size = Vector2(50, 0)
 layout_mode = 2
+focus_mode = 0
 
 [node name="RMS" type="HBoxContainer" parent="Menu/Options/WaveformOptions/WaveformOptionsDialog/VBox/Scrolling" unique_id=1179088146]
 layout_mode = 2
@@ -1115,11 +1119,13 @@ theme_override_constants/separation = 17
 [node name="ShowRMS" type="CheckBox" parent="Menu/Options/WaveformOptions/WaveformOptionsDialog/VBox/Scrolling/RMS" unique_id=1023818576]
 custom_minimum_size = Vector2(140, 0)
 layout_mode = 2
+focus_mode = 0
 text = "Show RMS"
 
 [node name="RMSColorPicker" type="ColorPickerButton" parent="Menu/Options/WaveformOptions/WaveformOptionsDialog/VBox/Scrolling/RMS" unique_id=44801954]
 custom_minimum_size = Vector2(50, 0)
 layout_mode = 2
+focus_mode = 0
 
 [node name="HSeparator" type="HSeparator" parent="Menu/Options/WaveformOptions/WaveformOptionsDialog/VBox" unique_id=1221295382]
 layout_mode = 2
@@ -1130,6 +1136,7 @@ theme_override_constants/separation = 20
 
 [node name="StaticActive" type="CheckButton" parent="Menu/Options/WaveformOptions/WaveformOptionsDialog/VBox/Static" unique_id=1170309285]
 layout_mode = 2
+focus_mode = 0
 button_pressed = true
 text = "Static Waveform"
 
@@ -1140,11 +1147,13 @@ theme_override_constants/separation = 17
 [node name="ShowPeak" type="CheckBox" parent="Menu/Options/WaveformOptions/WaveformOptionsDialog/VBox/Static/Peak" unique_id=1209757040]
 custom_minimum_size = Vector2(140, 0)
 layout_mode = 2
+focus_mode = 0
 text = "Show Peak"
 
 [node name="PeakColorPicker" type="ColorPickerButton" parent="Menu/Options/WaveformOptions/WaveformOptionsDialog/VBox/Static/Peak" unique_id=62488119]
 custom_minimum_size = Vector2(50, 0)
 layout_mode = 2
+focus_mode = 0
 
 [node name="RMS" type="HBoxContainer" parent="Menu/Options/WaveformOptions/WaveformOptionsDialog/VBox/Static" unique_id=1130665830]
 layout_mode = 2
@@ -1153,11 +1162,13 @@ theme_override_constants/separation = 17
 [node name="ShowRMS" type="CheckBox" parent="Menu/Options/WaveformOptions/WaveformOptionsDialog/VBox/Static/RMS" unique_id=750649459]
 custom_minimum_size = Vector2(140, 0)
 layout_mode = 2
+focus_mode = 0
 text = "Show RMS"
 
 [node name="RMSColorPicker" type="ColorPickerButton" parent="Menu/Options/WaveformOptions/WaveformOptionsDialog/VBox/Static/RMS" unique_id=361503105]
 custom_minimum_size = Vector2(50, 0)
 layout_mode = 2
+focus_mode = 0
 
 [node name="ChangeColors" type="Button" parent="Menu/Options" unique_id=2067750476]
 layout_mode = 2
@@ -1193,6 +1204,7 @@ horizontal_alignment = 2
 [node name="ColorPicker" type="ColorPickerButton" parent="Menu/Options/ChangeColors/ColorOptionsDialog/VBox/Backdrop" unique_id=572252050]
 custom_minimum_size = Vector2(32, 0)
 layout_mode = 2
+focus_mode = 0
 
 [node name="Ball" type="HBoxContainer" parent="Menu/Options/ChangeColors/ColorOptionsDialog/VBox" unique_id=1200835181]
 layout_mode = 2
@@ -1211,6 +1223,7 @@ horizontal_alignment = 2
 [node name="ColorPicker" type="ColorPickerButton" parent="Menu/Options/ChangeColors/ColorOptionsDialog/VBox/Ball/BallBase" unique_id=2073242589]
 custom_minimum_size = Vector2(32, 0)
 layout_mode = 2
+focus_mode = 0
 
 [node name="BallHoldBreath" type="HBoxContainer" parent="Menu/Options/ChangeColors/ColorOptionsDialog/VBox/Ball" unique_id=1922588133]
 layout_mode = 2
@@ -1225,6 +1238,7 @@ horizontal_alignment = 2
 [node name="ColorPicker" type="ColorPickerButton" parent="Menu/Options/ChangeColors/ColorOptionsDialog/VBox/Ball/BallHoldBreath" unique_id=1398411210]
 custom_minimum_size = Vector2(32, 0)
 layout_mode = 2
+focus_mode = 0
 
 [node name="Path" type="HBoxContainer" parent="Menu/Options/ChangeColors/ColorOptionsDialog/VBox" unique_id=816652304]
 layout_mode = 2
@@ -1243,6 +1257,7 @@ horizontal_alignment = 2
 [node name="ColorPicker" type="ColorPickerButton" parent="Menu/Options/ChangeColors/ColorOptionsDialog/VBox/Path/PathBase" unique_id=884793972]
 custom_minimum_size = Vector2(32, 0)
 layout_mode = 2
+focus_mode = 0
 
 [node name="PathHoldBreath" type="HBoxContainer" parent="Menu/Options/ChangeColors/ColorOptionsDialog/VBox/Path" unique_id=1741284729]
 layout_mode = 2
@@ -1257,6 +1272,7 @@ horizontal_alignment = 2
 [node name="ColorPicker" type="ColorPickerButton" parent="Menu/Options/ChangeColors/ColorOptionsDialog/VBox/Path/PathHoldBreath" unique_id=1490059609]
 custom_minimum_size = Vector2(32, 0)
 layout_mode = 2
+focus_mode = 0
 
 [node name="TopLine" type="HBoxContainer" parent="Menu/Options/ChangeColors/ColorOptionsDialog/VBox" unique_id=1673672338]
 layout_mode = 2
@@ -1275,6 +1291,7 @@ horizontal_alignment = 2
 [node name="ColorPicker" type="ColorPickerButton" parent="Menu/Options/ChangeColors/ColorOptionsDialog/VBox/TopLine/TopLineBase" unique_id=259516816]
 custom_minimum_size = Vector2(32, 0)
 layout_mode = 2
+focus_mode = 0
 
 [node name="TopLineActive" type="HBoxContainer" parent="Menu/Options/ChangeColors/ColorOptionsDialog/VBox/TopLine" unique_id=682852146]
 layout_mode = 2
@@ -1289,6 +1306,7 @@ horizontal_alignment = 2
 [node name="ColorPicker" type="ColorPickerButton" parent="Menu/Options/ChangeColors/ColorOptionsDialog/VBox/TopLine/TopLineActive" unique_id=911586010]
 custom_minimum_size = Vector2(32, 0)
 layout_mode = 2
+focus_mode = 0
 
 [node name="BottomLine" type="HBoxContainer" parent="Menu/Options/ChangeColors/ColorOptionsDialog/VBox" unique_id=150459536]
 layout_mode = 2
@@ -1307,6 +1325,7 @@ horizontal_alignment = 2
 [node name="ColorPicker" type="ColorPickerButton" parent="Menu/Options/ChangeColors/ColorOptionsDialog/VBox/BottomLine/BottomLineBase" unique_id=629186971]
 custom_minimum_size = Vector2(32, 0)
 layout_mode = 2
+focus_mode = 0
 
 [node name="BottomLineActive" type="HBoxContainer" parent="Menu/Options/ChangeColors/ColorOptionsDialog/VBox/BottomLine" unique_id=1501244731]
 layout_mode = 2
@@ -1321,6 +1340,7 @@ horizontal_alignment = 2
 [node name="ColorPicker" type="ColorPickerButton" parent="Menu/Options/ChangeColors/ColorOptionsDialog/VBox/BottomLine/BottomLineActive" unique_id=821751528]
 custom_minimum_size = Vector2(32, 0)
 layout_mode = 2
+focus_mode = 0
 
 [node name="ExportFunscripts" type="Button" parent="Menu/Options" unique_id=1289184778]
 layout_mode = 2

@@ -101,9 +101,9 @@ func _load_waveform_config() -> void:
 	for n in wv_nodes:
 		if   n.display_mode == 1: wv_scroll = n
 		elif n.display_mode == 0: wv_static = n
-
+	
 	var config := Data.config
-
+	
 	if wv_scroll:
 		if config.has_section_key('waveform', 'scroll_active'):
 			wv_scroll.visible = config.get_value('waveform', 'scroll_active')
@@ -115,7 +115,7 @@ func _load_waveform_config() -> void:
 			wv_scroll._peak_col = config.get_value('waveform', 'scroll_peak_color')
 		if config.has_section_key('waveform', 'scroll_rms_color'):
 			wv_scroll._rms_col = config.get_value('waveform', 'scroll_rms_color')
-
+	
 	if wv_static:
 		if config.has_section_key('waveform', 'static_active'):
 			var on: bool = config.get_value('waveform', 'static_active')
@@ -129,6 +129,7 @@ func _load_waveform_config() -> void:
 			wv_static._peak_col = config.get_value('waveform', 'static_peak_color')
 		if config.has_section_key('waveform', 'static_rms_color'):
 			wv_static._rms_col = config.get_value('waveform', 'static_rms_color')
+
 
 var input_zone_active: bool
 var input_zone_begin:  Vector2
@@ -145,6 +146,7 @@ func _on_input_focus_entered(node: Control):
 func _on_input_focus_exited(node: Control):
 	owner.input_disabled = false
 	input_zone_active = false
+
 
 func _input(event):
 	if not input_zone_active:
@@ -195,10 +197,10 @@ func _on_funscript_files_selected(paths: PackedStringArray) -> void:
 		file.close()
 		if not parsed is Dictionary:
 			continue
-
+		
 		var marker_data := {}
 		var path_meta := {}
-
+		
 		if parsed.has("markers"):
 			path_meta = parsed.get("meta", {})
 			for key in parsed["markers"]:
@@ -206,16 +208,16 @@ func _on_funscript_files_selected(paths: PackedStringArray) -> void:
 		else:
 			for key in parsed:
 				marker_data[int(key)] = parsed[key]
-
+		
 		if marker_data.is_empty():
 			continue
-
+		
 		var base_name := bx_path.get_basename()
 		var out_path := base_name + ".funscript"
 		Funscript.export(marker_data, path_meta, out_path, invert)
 		exported_paths.append(out_path)
 		count += 1
-
+	
 	if count > 0:
 		var text := "Exported %d funscript%s.\n" % [count, "" if count == 1 else "s"]
 		for i in mini(count, 5):

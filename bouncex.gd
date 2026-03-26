@@ -46,6 +46,7 @@ func _ready():
 	$Path.gradient.offsets[1] = 1
 	$Path.width = %Options/PathThickness.value
 	$Menu.self_modulate.a = 1.65
+	$MarkersMenu.self_modulate.a = 1.3
 	toggle_ball_visible(false)
 	update_display()
 	Data.check_migration()
@@ -395,6 +396,7 @@ func _on_render_pressed():
 	$Header/MenuButton.button_pressed = false
 	$RenderOptions.popup_centered()
 
+
 var apply_lead_in := true
 var apply_lead_out := true
 var active_effects: Dictionary
@@ -415,7 +417,7 @@ func render(starting_frame: int, ending_frame: int):
 	var resize_disabled = DisplayServer.WINDOW_FLAG_RESIZE_DISABLED
 	var borderless = DisplayServer.WINDOW_FLAG_BORDERLESS
 	var folder_name = path_name.trim_suffix('.bin')
-
+	
 	var ball_color_a: Color = $Ball.self_modulate
 	var ball_color_b: Color = hold_breath_ball_color
 	
@@ -616,7 +618,7 @@ func render(starting_frame: int, ending_frame: int):
 					elif effect_time == 0:
 						flash_frames = flash_total
 						active_effects.erase(effect)
-			
+		
 		await get_tree().process_frame
 		await get_tree().process_frame
 		$Path.add_point(Vector2(path_origin.x + step, path_origin.y))
@@ -640,6 +642,8 @@ func render(starting_frame: int, ending_frame: int):
 		$TrackSliderLarge.show()
 	
 	if is_video_track:
+		$WaveformStatic.hide()
+		$WaveformScrolling.hide()
 		%VideoStreamPlayer.show()
 		$TrackSliderLarge.show()
 	

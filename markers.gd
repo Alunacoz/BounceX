@@ -544,7 +544,7 @@ var _copy_tween: Tween
 func _on_copy_pressed():
 	if not selected_marker:
 		return
-
+	
 	if _copy_tween and _copy_tween.is_valid():
 		_copy_tween.kill()
 	var sprite: Sprite2D = owner.get_node("MarkersCopied")
