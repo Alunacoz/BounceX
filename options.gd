@@ -62,15 +62,16 @@ func _ready():
 
 func _on_path_speed_changed(value):
 	owner.path_speed = value
-	if %Controls.get_node('Paths').is_anything_selected():
-		%Controls.unload_all(true)
-		%Controls.last_path_index = -1
 	$PathSpeed/Label.text = "Path Speed: " + str(int(value))
 	Data.set_config('path', 'path_speed', value)
+	for marker in %Markers.marker_list.values():
+		marker.position.x = marker.get_meta('frame') * value
+	%Markers.connect_all_markers()
+	%Markers.position_markers()
 
 
 func _on_path_fade_value_changed(value):
-	$PathFade/Label.text = "Path Edge Fade: " + str(value)
+	$PathFade/Label.text = "Rendered Path Edge Fade: " + str(value)
 	owner.get_node('Path').gradient.colors[0].a = 1 - value
 	owner.get_node('Path').gradient.colors[2].a = 1 - value
 	Data.set_config('path', 'path_fade', value)
@@ -119,8 +120,8 @@ func _load_waveform_config() -> void:
 	if wv_static:
 		if config.has_section_key('waveform', 'static_active'):
 			var on: bool = config.get_value('waveform', 'static_active')
-			wv_static.visible = on and not owner.is_video_track
-			owner.get_node("%TrackSliderLarge").visible = not on or owner.is_video_track
+			wv_static.visible = on
+			owner.get_node("%TrackSliderLarge").visible = not on
 		if config.has_section_key('waveform', 'static_show_peak'):
 			wv_static.show_peak = config.get_value('waveform', 'static_show_peak')
 		if config.has_section_key('waveform', 'static_show_rms'):

@@ -57,8 +57,8 @@ func _connect_signals() -> void:
 	
 	if _wv_static:
 		d_static.get_node("StaticActive").toggled.connect(func(on: bool):
-			_wv_static.visible = on and not owner.is_video_track
-			%TrackSliderLarge.visible = not on or owner.is_video_track
+			_wv_static.visible = on
+			%TrackSliderLarge.visible = not on
 			Data.set_config("waveform", "static_active", on))
 		d_static.get_node("Peak/ShowPeak").toggled.connect(func(on: bool):
 			_wv_static.show_peak = on

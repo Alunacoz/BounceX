@@ -320,6 +320,14 @@ texture = ExtResource("6_68j5r")
 expand_mode = 1
 stretch_mode = 1
 
+[node name="WaveformStatic" type="Node2D" parent="." unique_id=812973158]
+position = Vector2(0, 925)
+script = ExtResource("31_avrwg")
+
+[node name="WaveformScrolling" type="Node2D" parent="." unique_id=1702736116]
+script = ExtResource("31_avrwg")
+display_mode = 1
+
 [node name="Markers" type="Control" parent="." unique_id=1744523429]
 unique_name_in_owner = true
 layout_mode = 1
@@ -384,16 +392,6 @@ gradient = SubResource("Gradient_gixs1")
 visible = false
 position = Vector2(576, 324)
 texture = ExtResource("8_5ek1g")
-
-[node name="WaveformStatic" type="Node2D" parent="." unique_id=812973158]
-z_index = -1
-position = Vector2(0, 925)
-script = ExtResource("31_avrwg")
-
-[node name="WaveformScrolling" type="Node2D" parent="." unique_id=1702736116]
-z_index = -1
-script = ExtResource("31_avrwg")
-display_mode = 1
 
 [node name="MarkersMenu" type="Panel" parent="." unique_id=1986661680]
 unique_name_in_owner = true
@@ -859,11 +857,11 @@ alignment = 1
 
 [node name="Copy" type="Button" parent="Menu/Controls/Paths/EditPathFile/VBox/Actions" unique_id=207992062]
 layout_mode = 2
-text = "  Copy File  "
+text = "  Copy Path  "
 
 [node name="Delete" type="Button" parent="Menu/Controls/Paths/EditPathFile/VBox/Actions" unique_id=1571032230]
 layout_mode = 2
-text = "  Delete File  "
+text = "  Delete Path  "
 
 [node name="ExportFunscript" type="Button" parent="Menu/Controls/Paths/EditPathFile/VBox/Actions" unique_id=530523912]
 layout_mode = 2
@@ -927,6 +925,7 @@ layout_mode = 2
 oversampling_override = 1.0
 title = "Delete Path?"
 position = Vector2i(0, 36)
+size = Vector2i(300, 100)
 ok_button_text = " DELETE "
 cancel_button_text = " Cancel "
 
@@ -977,7 +976,7 @@ layout_mode = 2
 
 [node name="Label" type="Label" parent="Menu/Options/PathFade" unique_id=732292403]
 layout_mode = 2
-text = "Path Edge Fade: 1"
+text = "Rendered Path Edge Fade: 1"
 horizontal_alignment = 1
 
 [node name="HSlider" type="HSlider" parent="Menu/Options/PathFade" unique_id=1395860022]
@@ -1398,7 +1397,7 @@ offset_right = 137.0
 offset_bottom = -5.0
 grow_vertical = 0
 theme_override_font_sizes/font_size = 17
-text = "BounceX v2.5.1"
+text = "BounceX v2.5.2"
 vertical_alignment = 1
 metadata/_edit_use_anchors_ = true
 
@@ -2173,6 +2172,7 @@ text = "Markers Pasted"
 [connection signal="about_to_popup" from="RenderOptions" to="RenderOptions" method="_on_about_to_popup"]
 [connection signal="canceled" from="RenderOptions" to="RenderOptions" method="_on_canceled"]
 [connection signal="confirmed" from="RenderOptions" to="RenderOptions" method="_on_confirmed"]
+[connection signal="value_changed" from="RenderOptions/VBox/Range/Start/SpinBox" to="RenderOptions" method="_on_start_value_changed"]
 [connection signal="toggled" from="RenderOptions/VBox/FromCurrentPos" to="RenderOptions" method="_on_from_current_pos_toggled"]
 [connection signal="toggled" from="RenderOptions/VBox/Padding/HBox/LeadIn" to="RenderOptions" method="_on_lead_in_toggled"]
 [connection signal="toggled" from="RenderOptions/VBox/Padding/HBox/LeadOut" to="RenderOptions" method="_on_lead_out_toggled"]

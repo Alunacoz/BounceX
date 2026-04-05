@@ -14,6 +14,7 @@ func _ready() -> void:
 	add_child(_video_scrub_timer)
 	load_tracks()
 	$Tracks/TrackSelection.get_popup().window_input.connect(_on_track_popup_input)
+	get_window().files_dropped.connect(_on_files_dropped)
 
 
 func _on_track_popup_input(event: InputEvent) -> void:
@@ -127,6 +128,11 @@ func scrub(value: float) -> void:
 		owner.toggle_ball_visible(false)
 
 
+func video_seek_debounced(pos: float) -> void:
+	_video_scrub_pending = pos
+	_video_scrub_timer.start()
+
+
 func _on_video_scrub_timeout() -> void:
 	if _video_scrub_pending < 0.0:
 		return
@@ -142,6 +148,18 @@ func _on_video_scrub_timeout() -> void:
 		%VideoStreamPlayer.paused = true
 	else:
 		%VideoStreamPlayer.set_stream_position(pos)
+	# Re-sync frame to where the video actually landed, but only for large jumps
+	# (slider drags). Small scrubs (mouse wheel) already set frame correctly in
+	# frame_scrub() — re-syncing those causes snap-back because the FFmpeg skip
+	# loop lands 1 frame before the target.
+	var stream_len: float = %VideoStreamPlayer.get_stream_length()
+	if stream_len > 0.0 and owner.path.size() > 10:
+		var t: float = %VideoStreamPlayer.stream_position / stream_len
+		var video_frame := clampi(int(t * (owner.path.size() - 1)), 0, owner.path.size() - 10)
+		if abs(owner.frame - video_frame) > 5:
+			owner.frame = video_frame
+			%Markers.position_markers()
+		owner._video_resync = 20
 
 
 func update_marker_menu() -> void:
@@ -202,7 +220,17 @@ func _on_track_selected(index: int) -> void:
 			_show_decode_error(track_name)
 			return
 		%VideoStreamPlayer.show()
-		_hide_waveforms()
+		var pcm := FFmpegVideoStream.extract_audio(file_path)
+		if pcm.size() > 0:
+			var audio := AudioStreamWAV.new()
+			audio.format = AudioStreamWAV.FORMAT_16_BITS
+			audio.stereo = true
+			audio.mix_rate = 44100
+			audio.data = pcm
+			$AudioStreamPlayer.stream = audio
+			_show_waveforms()
+		else:
+			_hide_waveforms()
 	else:
 		owner.is_video_track = false
 		var stream = Data.load_audio_stream(file_path)
@@ -333,6 +361,16 @@ func _dismiss_file_dialog() -> void:
 	if _pending_file_dialog:
 		_pending_file_dialog.queue_free()
 		_pending_file_dialog = null
+
+
+func _on_files_dropped(paths: PackedStringArray) -> void:
+	var valid_exts := ["mp3", "wav", "ogg"] + Data.VIDEO_EXTENSIONS
+	var filtered: PackedStringArray
+	for p in paths:
+		if p.get_extension().to_lower() in valid_exts:
+			filtered.append(p)
+	if not filtered.is_empty():
+		_on_track_files_selected(filtered)
 
 
 func _on_track_files_selected(source_paths: PackedStringArray) -> void:

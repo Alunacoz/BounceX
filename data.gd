@@ -50,34 +50,42 @@ func upgrade_path_file(file_path: String) -> void:
 	file.close()
 	if not parsed is Dictionary:
 		return
+	var changed := false
+	# Ensure path is using v2 file format
 	if not parsed.has("markers"):
-		# Old format: flat dict of string-frame keys → migrate to v2
 		var markers := {}
 		for key in parsed:
 			var m = parsed[key]
 			if m.size() < 4:
-				m.append(0)  # upgrade from versions < 2.2
+				m.append(0)  # original .bx files didn't include auxiliary field
 			markers[str(int(key))] = [m[0], int(m[1]), int(m[2]), int(m[3])]
 		var related_media := file_path.get_base_dir().get_file().get_basename()
 		parsed = {
-			"meta": {"version": "2.0", "marker_fields": ["depth", "trans", "ease", "auxiliary"], "related_media": related_media},
+			"meta": {
+				"version": 2.0,
+				"marker_fields": ["depth", "trans", "ease", "auxiliary"],
+				"related_media": related_media
+				},
 			"markers": markers
 		}
+		changed = true
 	# Ensure meta has required fields
 	var meta: Dictionary = parsed.get("meta", {})
-	var changed := false
 	if not meta.has("version"):
-		meta["version"] = "2.0"
+		meta["version"] = 2.0
+		changed = true
+	elif meta["version"] is String:
+		meta["version"] = maxf(float(meta["version"]), 2.0)
 		changed = true
 	if not meta.has("marker_fields"):
 		meta["marker_fields"] = ["depth", "trans", "ease", "auxiliary"]
 		changed = true
 	if changed:
 		parsed["meta"] = meta
-		var out := FileAccess.open(file_path, FileAccess.WRITE)
-		if out:
-			out.store_line(JSON.stringify(parsed))
-			out.close()
+		var new_file := FileAccess.open(file_path, FileAccess.WRITE)
+		if new_file:
+			new_file.store_line(JSON.stringify(parsed))
+			new_file.close()
 
 
 func save_path(file_path: String = get_file_path()) -> void:

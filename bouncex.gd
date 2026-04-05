@@ -32,6 +32,7 @@ var control_pressed: bool
 
 var input_disabled: bool
 var is_video_track: bool = false
+var _video_resync: int = 0
 
 enum Effects {
 	HOLD_BREATH = 1
@@ -66,6 +67,14 @@ func _physics_process(delta):
 					frame += 1
 				if $Markers.is_visible_in_tree():
 					$Markers.position.x -= path_speed
+				if is_video_track and _video_resync > 0:
+					_video_resync -= 1
+					var stream_len := _get_track_duration()
+					if stream_len > 0.0:
+						var video_frame := int(%VideoStreamPlayer.stream_position / stream_len * (path.size() - 1))
+						if abs(frame - video_frame) > 3:
+							frame = clampi(video_frame, 0, path.size() - 10)
+							$Markers.position_markers()
 			else:
 				%Play.button_pressed = false
 				$Header/Play.hide()
@@ -215,7 +224,7 @@ func frame_scrub(frame_movement: float) -> void:
 	var t := frame / float(path.size() - 1)
 	var track_length = _get_track_duration()
 	if is_video_track:
-		%Controls.scrub(t)
+		%Controls.video_seek_debounced(maxf(track_length * t, 0.05))
 	else:
 		var wv := get_tree().get_first_node_in_group("WaveformView")
 		if wv and wv.has_method("seek_audio"):
@@ -642,10 +651,7 @@ func render(starting_frame: int, ending_frame: int):
 		$TrackSliderLarge.show()
 	
 	if is_video_track:
-		$WaveformStatic.hide()
-		$WaveformScrolling.hide()
 		%VideoStreamPlayer.show()
-		$TrackSliderLarge.show()
 	
 	$Path.hide()
 	$Markers.show()
@@ -699,7 +705,7 @@ func update_display() -> void:
 	await get_tree().process_frame
 	$Markers.position_markers()
 	if is_instance_valid($WaveformStatic):
-		$WaveformStatic.position.y = get_viewport_rect().size.y - $WaveformStatic.view_height - 2
+		$WaveformStatic.position.y = get_viewport_rect().size.y - $WaveformStatic.view_height
 	if frame + 1 < path.size() and sign(path[frame+1]) > -1:
 		place_ball(path[frame+1])
 	else:
